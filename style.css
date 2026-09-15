@@ -1,6 +1,16 @@
 /* root sería las variables globales para que puedan usarse en cualquier parte*/
 :root{
-    --primary-color: #4502f1 
+    --primary-color: #4502f1; 
+    --bg-light:#dfdf;
+    --text-dark:#222;
+}
+
+body{
+    font-family:'Times New Roman', Times, serif;
+    margin: 20;
+    padding: 0;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
 }
 
 .logo-text{
