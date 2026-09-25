@@ -1,0 +1,51 @@
+<section id="nosotros" class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-4" style="color: var(--primary-color)">Nosotros</h2>
+
+    <p class="text-center mx-auto" style="max-width: 700px">
+      El Club Náutico Poseidón del Perú brinda a sus socios un espacio de esparcimiento y servicios
+      náuticos de calidad, cuidando sus embarcaciones y facilitando la práctica de actividades en el
+      mar.
+    </p>
+  </div>
+</section>
+
+<section id="servicios" class="py-5" style="background-color: var(--bg-light)">
+  <div class="container">
+    <h2 class="text-center mb-4" style="color: var(--primary-color)">Servicios</h2>
+
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3" *ngFor="let s of servicios">
+        <div class="card h-100 text-center shadow-sm">
+          <img [src]="s.imagen" class="card-img-top" [alt]="s.nombre" />
+
+          <div class="card-body">
+            <h5 class="card-title">
+              {{ s.nombre }}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="instalaciones" class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-4" style="color: var(--primary-color)">Instalaciones</h2>
+
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-4" *ngFor="let i of instalaciones">
+        <div class="card h-100 text-center shadow-sm">
+          <img [src]="i.imagen" class="card-img-top" [alt]="i.nombre" />
+
+          <div class="card-body">
+            <h5 class="card-title">
+              {{ i.nombre }}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
