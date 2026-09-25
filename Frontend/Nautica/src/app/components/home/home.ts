@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Hero } from './hero/hero';
 import { Info } from './info/info';
+import { Contacto } from './contacto/contacto';
 
 @Component({
-  imports: [Hero, Info],
+  imports: [Hero, Info, Contacto],
   selector: 'app-home',
   standalone: true,
   templateUrl: './home.html',

@@ -1,0 +1,73 @@
+<section id="contacto" class="py-5" style="background-color: var(--bg-light)">
+  <div class="container">
+    <h2 class="text-center mb-4" style="color: var(--primary-color)">Contacto</h2>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form [formGroup]="formulario" (ngSubmit)="enviar()">
+          <div class="mb-3">
+            <label class="form-label"> Nombre </label>
+
+            <input type="text" class="form-control" formControlName="nombre" />
+
+            <div
+              class="text-danger small"
+              *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched"
+            >
+              El nombre es obligatorio.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"> Correo electrónico </label>
+
+            <input type="email" class="form-control" formControlName="correo" />
+
+            <div
+              class="text-danger small"
+              *ngIf="formulario.get('correo')?.invalid && formulario.get('correo')?.touched"
+            >
+              Ingresa un correo válido.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"> Mensaje </label>
+
+            <textarea class="form-control" rows="4" formControlName="mensaje"></textarea>
+
+            <div
+              class="text-danger small"
+              *ngIf="formulario.get('mensaje')?.invalid && formulario.get('mensaje')?.touched"
+            >
+              Escribe tu mensaje.
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-warning fw-bold" [disabled]="formulario.invalid">
+              Enviar mensaje
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 text-center">
+          <p class="mb-1">
+            <strong>Dirección:</strong>
+            Av. del Muelle 123, Callao, Perú
+          </p>
+
+          <p class="mb-1">
+            <strong>Teléfono:</strong>
+            (01) 123-4567
+          </p>
+
+          <p>
+            <strong>Horario:</strong>
+            Lunes a domingo, 8:00 a.m. – 8:00 p.m.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
