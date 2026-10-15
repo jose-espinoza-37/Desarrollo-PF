@@ -1,10 +1,19 @@
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color)">
+
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="#inicio">
-        Club <span class="text-warning">Poseidón</span>
+      <!-- Identidad del club -->
+      <a
+        class="navbar-brand"
+        href="#inicio"
+        (click)="desplazarA($event)"
+        aria-label="Club Náutico Poseidón, ir al inicio"
+      >
+        <span class="brand-club">CLUB NÁUTICO</span>
+        <span class="brand-name">Poseidón<span class="brand-period">.</span></span>
       </a>
 
+      <!-- Botón del menú para móviles -->
       <button
         class="navbar-toggler"
         type="button"
@@ -17,18 +26,32 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Enlaces de navegación -->
       <div class="collapse navbar-collapse" id="navbarNautica">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav me-auto align-items-lg-center">
           <li class="nav-item">
-            <a class="nav-link" href="#inicio">Inicio</a>
+            <a
+              class="nav-link"
+              href="#inicio"
+              (click)="desplazarA($event)"
+            >
+              Inicio
+            </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="#nosotros">Nosotros</a>
+            <a
+              class="nav-link"
+              href="#nosotros"
+              (click)="desplazarA($event)"
+            >
+              Nosotros
+            </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link"
+            <a
+              class="nav-link"
               href="#servicios"
               (click)="desplazarA($event)"
             >
@@ -37,23 +60,40 @@
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" 
-            href="#instalaciones"
-            (click)="desplazarA($event)"
+            <a
+              class="nav-link"
+              href="#instalaciones"
+              (click)="desplazarA($event)"
             >
-            Instalaciones
-          </a>
+              Instalaciones
+            </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" routerLink="/contacto">Contacto</a>
+            <a class="nav-link" routerLink="/contacto">
+              Contacto
+            </a>
           </li>
         </ul>
 
-        <div class="d-flex gap-2">
-          <a href="#contacto" class="btn btn-outline-light btn-sm"> Iniciar sesión </a>
+        <!-- Acciones principales -->
+        <div class="header-actions d-flex flex-column flex-lg-row gap-2">
+          <a
+            href="#contacto"
+            class="btn btn-login"
+            (click)="desplazarA($event)"
+          >
+            Iniciar sesión
+          </a>
 
-          <a href="#contacto" class="btn btn-warning btn-sm fw-bold"> Hazte socio </a>
+          <a
+            href="#contacto"
+            class="btn btn-member"
+            (click)="desplazarA($event)"
+          >
+            Hazte socio
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
     </div>

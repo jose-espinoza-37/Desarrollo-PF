@@ -1,0 +1,192 @@
+
+:host {
+  display: block;
+  position: relative;
+  z-index: 1000;
+}
+
+.site-header {
+  border-bottom: 3px solid var(--accent-color);
+  box-shadow: 0 4px 18px rgba(11, 45, 66, 0.12);
+}
+
+.navbar {
+  background-color: var(--primary-color);
+  padding: 0.8rem 0;
+}
+
+/* Identidad del club */
+.navbar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.2rem 0;
+  margin-right: 2rem;
+  text-decoration: none;
+  line-height: 1.15;
+}
+
+.brand-club {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+}
+
+.brand-name {
+  color: var(--white);
+  font-size: 1.65rem;
+  font-weight: 750;
+  letter-spacing: 0.3px;
+}
+
+.brand-period {
+  color: var(--accent-color);
+}
+
+/* Enlaces de navegación */
+.navbar-nav {
+  gap: 0.35rem;
+}
+
+.navbar .nav-link {
+  position: relative;
+  padding: 0.75rem 0.8rem;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.93rem;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible {
+  color: var(--accent-color);
+}
+
+/* Línea dorada al pasar el cursor */
+.navbar .nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0.8rem;
+  right: 0.8rem;
+  bottom: 0.35rem;
+  height: 2px;
+  background-color: var(--accent-color);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.navbar .nav-link:hover::after,
+.navbar .nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Botones del encabezado */
+.header-actions {
+  margin-left: 1.25rem;
+}
+
+.header-actions .btn {
+  padding: 0.62rem 1rem;
+  border-radius: 5px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.btn-login {
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background-color: transparent;
+}
+
+.btn-login:hover {
+  color: var(--primary-color);
+  border-color: var(--white);
+  background-color: var(--white);
+}
+
+.btn-member {
+  color: var(--primary-color);
+  border: 1px solid var(--accent-color);
+  background-color: var(--accent-color);
+}
+
+.btn-member:hover {
+  color: var(--primary-color);
+  border-color: #dfc17f;
+  background-color: #dfc17f;
+  transform: translateY(-1px);
+}
+
+.btn-member span {
+  display: inline-block;
+  margin-left: 0.35rem;
+  transition: transform 0.25s ease;
+}
+
+.btn-member:hover span {
+  transform: translateX(3px);
+}
+
+/* Botón del menú móvil */
+.navbar-toggler {
+  padding: 0.4rem 0.55rem;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.15rem rgba(201, 164, 92, 0.35);
+}
+
+/* Adaptación a pantallas pequeñas */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding-top: 1rem;
+  }
+
+  .navbar-nav {
+    align-items: stretch !important;
+    gap: 0.1rem;
+  }
+
+  .navbar .nav-link {
+    padding: 0.7rem 0.25rem;
+  }
+
+  .navbar .nav-link::after {
+    left: 0.25rem;
+    right: auto;
+    bottom: 0.35rem;
+    width: 45px;
+  }
+
+  .header-actions {
+    margin: 0.75rem 0 0;
+    padding-bottom: 0.5rem;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Respeta las preferencias de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .navbar .nav-link,
+  .navbar .nav-link::after,
+  .header-actions .btn,
+  .btn-member span {
+    transition: none;
+  }
+
+  .btn-member:hover {
+    transform: none;
+  }
+}
