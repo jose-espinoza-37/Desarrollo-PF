@@ -1,10 +1,31 @@
 @import 'bootstrap/scss/bootstrap';
 @import './styles/abstracts/shared';
 
+:root {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: $font-base;
   background-color: var(--bg-light);
   color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* Evita que las imágenes superen el ancho de su contenedor */
+img {
+  max-width: 100%;
+}
+
+/* Estilo base para los enlaces */
+a {
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+/* Selección de texto */
+::selection {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
 }

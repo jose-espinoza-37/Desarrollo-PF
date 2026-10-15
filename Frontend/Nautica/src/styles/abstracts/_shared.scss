@@ -1,15 +1,39 @@
 :root {
-  --primary-color: #0a4a6e;
-  --secondary-color: #1b7a9c;
-  --accent-color: #f2a900;
-  --bg-light: #f4f8fa;
-  --text-dark: #222222;
+  /* Colores principales: identidad náutica */
+  --primary-color: #0b2d42;
+  --secondary-color: #176b87;
+  --accent-color: #c9a45c;
+
+  /* Fondos y textos */
+  --bg-light: #f5f7f8;
+  --bg-white: #ffffff;
+  --text-dark: #243746;
+  --text-muted: #647783;
   --white: #ffffff;
-  --border-color: #dde3e6;
+
+  /* Bordes y sombras */
+  --border-color: #dce5e9;
+  --shadow-soft: 0 8px 24px rgba(11, 45, 66, 0.08);
 }
 
-$font-base: 'Times New Roman', Times, serif;
+/* Tipografía general */
+$font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
+/* Títulos de las secciones */
 .section-title {
   color: var(--primary-color);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+/* Línea decorativa debajo de los títulos */
+.section-title::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin: 12px auto 0;
+  background-color: var(--accent-color);
+  border-radius: 2px;
 }
