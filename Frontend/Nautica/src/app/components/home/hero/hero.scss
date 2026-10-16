@@ -1,6 +1,193 @@
+
 .hero {
-  background-image: url('/assets/imagenes/hero/1.png');
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  min-height: clamp(500px, 78vh, 760px);
+  padding: 5rem 0;
+
+  background-image: url('/assets/imagenes/hero/1.jfif');
   background-size: cover;
   background-position: center;
-  min-height: 60vh;
+  background-repeat: no-repeat;
+}
+
+/* Capa oscura para que el texto se lea sobre la fotografía */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background: linear-gradient(
+    90deg,
+    rgba(5, 27, 42, 0.88) 0%,
+    rgba(5, 27, 42, 0.68) 48%,
+    rgba(5, 27, 42, 0.2) 100%
+  );
+}
+
+.hero-container {
+  position: relative;
+}
+
+.hero-content {
+  max-width: 760px;
+  padding: 1.5rem 0;
+}
+
+/* Identificador superior */
+.hero-eyebrow {
+  margin-bottom: 1.25rem;
+
+  color: var(--accent-color);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+/* Título principal */
+.hero-title {
+  margin-bottom: 1.5rem;
+
+  color: var(--white);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 750;
+  line-height: 1.12;
+  letter-spacing: -1.2px;
+}
+
+.hero-title span {
+  display: block;
+  margin-top: 0.35rem;
+
+  color: #e5c987;
+}
+
+/* Descripción */
+.hero-description {
+  max-width: 590px;
+  margin-bottom: 2rem;
+
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.8;
+}
+
+/* Botones */
+.hero-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  min-height: 52px;
+  padding: 0.85rem 1.4rem;
+
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.hero-btn-primary {
+  color: var(--primary-color);
+  border: 1px solid var(--accent-color);
+  background-color: var(--accent-color);
+}
+
+.hero-btn-primary:hover {
+  color: var(--primary-color);
+  border-color: #dfc17f;
+  background-color: #dfc17f;
+  transform: translateY(-2px);
+}
+
+.hero-btn-primary span {
+  transition: transform 0.25s ease;
+}
+
+.hero-btn-primary:hover span {
+  transform: translateX(4px);
+}
+
+.hero-btn-secondary {
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.hero-btn-secondary:hover {
+  color: var(--primary-color);
+  border-color: var(--white);
+  background-color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* Detalle decorativo inferior */
+.hero-bottom-line {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-color),
+    rgba(201, 164, 92, 0.15)
+  );
+}
+
+/* Adaptación para móviles */
+@media (max-width: 575.98px) {
+  .hero {
+    min-height: 560px;
+    padding: 3.5rem 0;
+    background-position: 60% center;
+  }
+
+  .hero::before {
+    background: rgba(5, 27, 42, 0.76);
+  }
+
+  .hero-content {
+    padding: 1rem 0;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.3rem, 10vw, 3.2rem);
+    letter-spacing: -0.6px;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Respeta la preferencia de reducir animaciones */
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions .btn,
+  .hero-btn-primary span {
+    transition: none;
+  }
+
+  .hero-actions .btn:hover {
+    transform: none;
+  }
 }

@@ -1,13 +1,44 @@
-<section id="inicio" class="hero d-flex align-items-center text-white text-center">
-  <div class="container bg-dark bg-opacity-50 rounded p-4">
-    <h1 class="display-5 fw-bold">Bienvenido al Club Náutico Poseidón del Perú</h1>
 
-    <p class="lead">Un espacio pensado para quienes aman el mar.</p>
+<section
+  id="inicio"
+  class="hero d-flex align-items-center text-white"
+>
+  <div class="container hero-container">
+    <div class="hero-content">
+      <p class="hero-eyebrow">
+        CLUB NÁUTICO POSEIDÓN DEL PERÚ
+      </p>
 
-    <div class="d-flex justify-content-center gap-3 mt-3">
-      <a href="#contacto" class="btn btn-warning btn-lg fw-bold"> Quiero ser socio </a>
+      <h1 class="hero-title">
+        Vive el mar.
+        <span>Disfruta la experiencia.</span>
+      </h1>
 
-      <a href="#servicios" class="btn btn-outline-light btn-lg"> Conoce nuestros servicios </a>
+      <p class="hero-description">
+        Un espacio pensado para quienes aman el mar,
+        disfrutan la navegación y comparten la pasión por la vida náutica.
+      </p>
+
+      <div class="hero-actions d-flex flex-column flex-sm-row gap-3">
+        <a
+          href="#contacto"
+          class="btn hero-btn-primary"
+          (click)="desplazarA($event)"
+        >
+          Quiero ser socio
+          <span aria-hidden="true">→</span>
+        </a>
+
+        <a
+          href="#servicios"
+          class="btn hero-btn-secondary"
+          (click)="desplazarA($event)"
+        >
+          Conoce nuestros servicios
+        </a>
+      </div>
     </div>
   </div>
+
+  <div class="hero-bottom-line" aria-hidden="true"></div>
 </section>
