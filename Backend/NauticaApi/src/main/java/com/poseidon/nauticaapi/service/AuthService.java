@@ -3,6 +3,7 @@ package com.poseidon.nauticaapi.service;
 
 import com.poseidon.nauticaapi.entity.Rol;
 import com.poseidon.nauticaapi.entity.Usuario;
+import com.poseidon.nauticaapi.exception.CredencialesInvalidasException;
 import com.poseidon.nauticaapi.repository.UsuarioRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,5 +57,29 @@ public class AuthService {
 
         // Guardar el usuario en PostgreSQL
         return usuarioRepository.save(usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario login(String correo, String password) {
+
+        // Normalizar el correo
+        correo = correo.trim().toLowerCase(Locale.ROOT);
+
+        // Buscar al usuario por su correo
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(CredencialesInvalidasException::new);
+
+        // Verificar si la cuenta está activa
+        if (!usuario.isActivo()) {
+            throw new CredencialesInvalidasException();
+        }
+
+        // Comparar la contraseña ingresada con el hash BCrypt
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new CredencialesInvalidasException();
+        }
+
+        // Devolver el usuario autenticado
+        return usuario;
     }
 }
