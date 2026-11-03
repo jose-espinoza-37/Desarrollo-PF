@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.poseidon.nauticaapi.exception.CredencialesInvalidasException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -74,6 +75,15 @@ public class GlobalExceptionHandler {
         return crearRespuesta(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Ocurrio un error interno en el servidor.");
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<Map<String, Object>> manejarCredencialesInvalidas(
+            CredencialesInvalidasException ex) {
+
+        return crearRespuesta(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage());
     }
 
     // Metodo auxiliar para construir respuestas
