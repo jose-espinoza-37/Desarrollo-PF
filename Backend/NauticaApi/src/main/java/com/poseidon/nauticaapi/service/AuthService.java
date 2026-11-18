@@ -1,10 +1,11 @@
-
 package com.poseidon.nauticaapi.service;
 
+import com.poseidon.nauticaapi.dto.response.AuthResponse;
 import com.poseidon.nauticaapi.entity.Rol;
 import com.poseidon.nauticaapi.entity.Usuario;
 import com.poseidon.nauticaapi.exception.CredencialesInvalidasException;
 import com.poseidon.nauticaapi.repository.UsuarioRepository;
+import com.poseidon.nauticaapi.security.JwtService;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,16 @@ public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
 
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -60,7 +64,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public Usuario login(String correo, String password) {
+    public AuthResponse login(String correo, String password) {
 
         // Normalizar el correo
         correo = correo.trim().toLowerCase(Locale.ROOT);
@@ -79,7 +83,16 @@ public class AuthService {
             throw new CredencialesInvalidasException();
         }
 
-        // Devolver el usuario autenticado
-        return usuario;
+        // Credenciales correctas: generar el JWT
+        String token = jwtService.generarToken(usuario);
+
+        // Devolver el token junto con los datos públicos del usuario
+        return new AuthResponse(
+                token,
+                usuario.getId(),
+                usuario.getNombres(),
+                usuario.getApellidos(),
+                usuario.getCorreo(),
+                usuario.getRol());
     }
 }

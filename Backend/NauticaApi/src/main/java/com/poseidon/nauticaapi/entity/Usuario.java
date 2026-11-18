@@ -1,4 +1,3 @@
-
 package com.poseidon.nauticaapi.entity;
 
 import jakarta.persistence.Column;

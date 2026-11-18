@@ -1,4 +1,3 @@
-
 package com.poseidon.nauticaapi.dto.response;
 
 import com.poseidon.nauticaapi.entity.Rol;

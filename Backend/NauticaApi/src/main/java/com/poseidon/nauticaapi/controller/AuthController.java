@@ -1,9 +1,8 @@
-
 package com.poseidon.nauticaapi.controller;
 
 import com.poseidon.nauticaapi.dto.request.LoginRequest;
 import com.poseidon.nauticaapi.dto.request.RegistroRequest;
-import com.poseidon.nauticaapi.dto.response.LoginResponse;
+import com.poseidon.nauticaapi.dto.response.AuthResponse;
 import com.poseidon.nauticaapi.entity.Usuario;
 import com.poseidon.nauticaapi.service.AuthService;
 
@@ -45,22 +44,14 @@ public class AuthController {
                                 .body(respuesta);
         }
 
-        // INICIO DE SESIÓN
+        // INICIO DE SESIÓN (devuelve JWT)
         @PostMapping("/login")
-        public ResponseEntity<LoginResponse> iniciarSesion(
+        public ResponseEntity<AuthResponse> iniciarSesion(
                         @Valid @RequestBody LoginRequest request) {
 
-                Usuario usuario = authService.login(
+                AuthResponse respuesta = authService.login(
                                 request.getCorreo(),
                                 request.getPassword());
-
-                LoginResponse respuesta = new LoginResponse(
-                                "Inicio de sesión exitoso.",
-                                usuario.getId(),
-                                usuario.getNombres(),
-                                usuario.getApellidos(),
-                                usuario.getCorreo(),
-                                usuario.getRol());
 
                 return ResponseEntity.ok(respuesta);
         }
