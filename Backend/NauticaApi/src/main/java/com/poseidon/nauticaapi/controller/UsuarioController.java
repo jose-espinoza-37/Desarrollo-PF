@@ -26,7 +26,6 @@ public class UsuarioController {
     @GetMapping("/usuarios/me")
     public ResponseEntity<Map<String, Object>> miPerfil(Authentication autenticacion) {
 
-        // El filtro JWT guardó el correo como nombre de la autenticación.
         Usuario usuario = usuarioRepository.findByCorreo(autenticacion.getName())
                 .orElseThrow(CredencialesInvalidasException::new);
 
@@ -38,11 +37,5 @@ public class UsuarioController {
                 "rol", usuario.getRol().name());
 
         return ResponseEntity.ok(perfil);
-    }
-
-    // TEMPORAL: solo para probar que /api/admin/** exige rol ADMINISTRADOR.
-    @GetMapping("/admin/ping")
-    public ResponseEntity<Map<String, String>> pingAdmin() {
-        return ResponseEntity.ok(Map.of("mensaje", "Acceso de administrador confirmado."));
     }
 }
