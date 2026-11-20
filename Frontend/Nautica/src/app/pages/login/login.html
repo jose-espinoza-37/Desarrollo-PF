@@ -1,0 +1,92 @@
+<section class="login-section">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <div class="login-icono"><i class="bi bi-life-preserver"></i></div>
+      <h1 class="login-titulo">Iniciar sesión</h1>
+      <p class="login-subtitulo">Accede al sistema del Club Náutico Poseidón</p>
+    </div>
+
+    @if (errorServidor()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 py-2" role="alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <span>{{ errorServidor() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input
+            id="correo"
+            type="email"
+            class="form-control"
+            formControlName="correo"
+            placeholder="usuario@poseidon.pe"
+            autocomplete="username"
+            [class.is-invalid]="invalido('correo')"
+          />
+        </div>
+        @if (invalido('correo')) {
+          <div class="text-danger small mt-1">
+            @if (form.controls.correo.hasError('required')) {
+              El correo es obligatorio.
+            } @else if (form.controls.correo.hasError('pattern')) {
+              Ingresa un correo válido (ejemplo: nombre&#64;dominio.com).
+            } @else if (form.controls.correo.hasError('maxlength')) {
+              El correo no puede superar los 150 caracteres.
+            }
+          </div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input
+            id="password"
+            [type]="verPassword() ? 'text' : 'password'"
+            class="form-control"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            autocomplete="current-password"
+            [class.is-invalid]="invalido('password')"
+          />
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="verPassword.set(!verPassword())"
+            [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()"></i>
+          </button>
+        </div>
+        @if (invalido('password')) {
+          <div class="text-danger small mt-1">
+            @if (form.controls.password.hasError('required')) {
+              La contraseña es obligatoria.
+            } @else if (form.controls.password.hasError('minlength')) {
+              La contraseña debe tener al menos 8 caracteres.
+            } @else if (form.controls.password.hasError('maxlength')) {
+              La contraseña no puede superar los 72 caracteres.
+            }
+          </div>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-ingresar w-100" [disabled]="enviando()">
+        @if (enviando()) {
+          <span class="spinner-border spinner-border-sm me-2"></span> Ingresando...
+        } @else {
+          Ingresar <i class="bi bi-arrow-right ms-1"></i>
+        }
+      </button>
+    </form>
+
+    <p class="text-center mt-4 mb-0 small">
+      <a routerLink="/" class="link-volver"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
+    </p>
+  </div>
+</section>

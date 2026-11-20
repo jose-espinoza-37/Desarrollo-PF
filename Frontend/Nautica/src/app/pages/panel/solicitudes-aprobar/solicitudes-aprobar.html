@@ -1,0 +1,140 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-check2-circle"></i> Aprobar solicitudes</h2>
+    <p class="text-muted mb-0 small">
+      Solicitudes verificadas como <strong>pagador</strong>. Al aprobar se otorga el rango de Socio;
+      al desaprobar se registran los motivos y se genera el documento para el postulante.
+    </p>
+  </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargar()">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'pendientes'" (click)="pestana.set('pendientes')">
+      Por decidir <span class="badge text-bg-info ms-1">{{ pendientes().length }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'historial'" (click)="pestana.set('historial')">
+      Historial <span class="badge text-bg-secondary ms-1">{{ historial().length }}</span>
+    </button>
+  </li>
+</ul>
+
+<div class="card tarjeta">
+  <div class="card-body">
+    @if (pestana() === 'pendientes') {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Postulante</th>
+              <th>Verificación</th>
+              <th>Verificado</th>
+              <th class="text-end">Decisión</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of pendientes() | paginate: { itemsPerPage: 8, currentPage: paginaPendientes(), id: 'pend' }; track s.id) {
+              <tr>
+                <td><code [title]="s.codigo">{{ codigoCorto(s.codigo) }}</code></td>
+                <td>
+                  <div class="fw-semibold">{{ s.nombres }} {{ s.apellidos }}</div>
+                  <div class="small text-muted">DNI {{ s.dni }} · {{ s.correo }}</div>
+                  @if (antecedentes(s).length > 0) {
+                    <button type="button" class="badge text-bg-danger border-0 mt-1" (click)="verAntecedentes(s)">
+                      <i class="bi bi-exclamation-triangle"></i> DNI con {{ antecedentes(s).length }} solicitud(es) anterior(es)
+                    </button>
+                  }
+                </td>
+                <td style="max-width: 320px">
+                  <span class="badge text-bg-success mb-1">Pagador</span>
+                  <div class="small text-muted text-truncate" [title]="s.resultadoVerificacion">{{ s.resultadoVerificacion }}</div>
+                </td>
+                <td class="small">
+                  {{ s.fechaVerificacion | date: 'dd/MM/yyyy' }}<br />
+                  <span class="text-muted">{{ s.verificadoPor }}</span>
+                </td>
+                <td class="text-end text-nowrap">
+                  <button type="button" class="btn btn-sm btn-success me-1" (click)="aprobar(s)">
+                    <i class="bi bi-check-lg"></i> Aprobar
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="desaprobar(s)">
+                    <i class="bi bi-x-lg"></i> Desaprobar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  @if (cargado()) { No hay solicitudes pendientes de aprobación. } @else { Cargando... }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (pendientes().length > 8) {
+        <div class="d-flex justify-content-center mt-3">
+          <pagination-controls id="pend" (pageChange)="paginaPendientes.set($event)" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+        </div>
+      }
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Postulante</th>
+              <th>Clasificación</th>
+              <th>Estado</th>
+              <th>Resuelto</th>
+              <th class="text-end">Documento</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of historial() | paginate: { itemsPerPage: 8, currentPage: paginaHistorial(), id: 'hist' }; track s.id) {
+              <tr>
+                <td><code [title]="s.codigo">{{ codigoCorto(s.codigo) }}</code></td>
+                <td>
+                  <div class="fw-semibold">{{ s.nombres }} {{ s.apellidos }}</div>
+                  <div class="small text-muted">DNI {{ s.dni }}</div>
+                  @if (antecedentes(s).length > 0) {
+                    <button type="button" class="badge text-bg-danger border-0 mt-1" (click)="verAntecedentes(s)">
+                      <i class="bi bi-exclamation-triangle"></i> {{ antecedentes(s).length }} antecedente(s)
+                    </button>
+                  }
+                </td>
+                <td>
+                  @if (s.clasificacion) {
+                    <span class="badge {{ CLASIFICACIONES[s.clasificacion].clase }}">{{ CLASIFICACIONES[s.clasificacion].etiqueta }}</span>
+                  }
+                </td>
+                <td><span class="badge {{ claseEstado(s.estado) }}">{{ etiquetaEstado(s.estado) }}</span></td>
+                <td class="small">{{ (s.fechaResolucion ?? s.fechaVerificacion) | date: 'dd/MM/yyyy' }}</td>
+                <td class="text-end">
+                  @if (s.estado === 'DESAPROBADA') {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="imprimirConstancia(s)">
+                      <i class="bi bi-file-earmark-text"></i> Constancia
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center text-muted py-4">Sin registros.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (historial().length > 8) {
+        <div class="d-flex justify-content-center mt-3">
+          <pagination-controls id="hist" (pageChange)="paginaHistorial.set($event)" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+        </div>
+      }
+    }
+  </div>
+</div>

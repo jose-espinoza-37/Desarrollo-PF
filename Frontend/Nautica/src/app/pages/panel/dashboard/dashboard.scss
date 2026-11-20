@@ -1,0 +1,65 @@
+.titulo-pagina {
+  color: var(--primary-color);
+  font-weight: 750;
+  font-size: 1.5rem;
+}
+
+.tarjeta {
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.kpi {
+  height: 100%;
+  padding: 1rem 1.15rem;
+  border-radius: 14px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.kpi-label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-valor {
+  color: var(--primary-color);
+  font-size: 1.9rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.kpi-nota {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.chart-titulo {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.chart-sub {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.tabla-datos {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.punto {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 2px;
+}

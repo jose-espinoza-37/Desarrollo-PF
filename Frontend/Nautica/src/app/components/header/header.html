@@ -78,19 +78,17 @@
 
         <!-- Acciones principales -->
         <div class="header-actions d-flex flex-column flex-lg-row gap-2">
-          <a
-            href="#contacto"
-            class="btn btn-login"
-            (click)="desplazarA($event)"
-          >
-            Iniciar sesión
-          </a>
+          @if (auth.estaAutenticado()) {
+            <a routerLink="/panel" class="btn btn-login">
+              <i class="bi bi-speedometer2"></i> Ir al panel
+            </a>
+          } @else {
+            <a routerLink="/login" class="btn btn-login">
+              <i class="bi bi-person"></i> Iniciar sesión
+            </a>
+          }
 
-          <a
-            href="#contacto"
-            class="btn btn-member"
-            (click)="desplazarA($event)"
-          >
+          <a routerLink="/solicitud" class="btn btn-member">
             Hazte socio
             <span aria-hidden="true">→</span>
           </a>

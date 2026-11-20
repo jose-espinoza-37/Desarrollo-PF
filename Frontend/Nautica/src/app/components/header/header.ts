@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -9,6 +11,9 @@ import { RouterLink } from '@angular/router';
   styleUrl: './header.scss',
 })
 export class Header {
+  readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   desplazarA(event: Event): void {
     const enlace = event.currentTarget as HTMLAnchorElement;
     const destinoId = enlace.getAttribute('href');
@@ -20,8 +25,11 @@ export class Header {
 
     const destino = document.querySelector(destinoId);
 
-    // Si la sección no existe, dejamos que el navegador actúe normalmente.
+    // Si la sección no está en esta página (ej. estamos en /login),
+    // volvemos al Home y el router desplaza hasta la sección.
     if (!destino) {
+      event.preventDefault();
+      this.router.navigate(['/'], { fragment: destinoId.substring(1) });
       return;
     }
 

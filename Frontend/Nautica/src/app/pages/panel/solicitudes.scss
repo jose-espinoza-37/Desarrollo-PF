@@ -1,0 +1,56 @@
+.titulo-pagina {
+  color: var(--primary-color);
+  font-weight: 750;
+  font-size: 1.5rem;
+}
+
+.tarjeta {
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+thead th {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom-width: 2px;
+}
+
+.btn-primario {
+  background: var(--primary-color);
+  color: var(--white);
+
+  &:hover:not(:disabled) {
+    background: var(--secondary-color);
+    color: var(--white);
+  }
+}
+
+.datos > div {
+  font-weight: 600;
+
+  span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+}
+
+.opcion {
+  white-space: normal;
+}
+
+.btn-check:checked + .opcion {
+  border-color: var(--primary-color);
+  background: rgba(11, 45, 66, 0.06);
+  color: var(--text-dark);
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+:host ::ng-deep .ngx-pagination .current {
+  background: var(--primary-color);
+}

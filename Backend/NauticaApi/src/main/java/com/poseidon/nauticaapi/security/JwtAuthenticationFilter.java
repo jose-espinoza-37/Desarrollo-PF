@@ -37,32 +37,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. Leer el encabezado Authorization
+
         String encabezado = request.getHeader("Authorization");
 
-        // 2. Sin encabezado o sin esquema Bearer: continuar sin autenticar
+
         if (encabezado == null || !encabezado.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Extraer el token (lo que va después de "Bearer ")
+
         String token = encabezado.substring(7);
 
-        // 4. Validar firma y vencimiento
+
         if (jwtService.esTokenValido(token)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             String correo = jwtService.extraerCorreo(token);
 
-            // 5. Consultar el estado actual del usuario en la base de datos
+
             usuarioRepository.findByCorreo(correo)
-                    .filter(usuario -> usuario.isActivo())
+                    .filter(usuario -> usuario.isActivo() && usuario.getRol() != null)
                     .ifPresent(usuario -> {
 
-                        // 6. Autoridad según el rol actual en la base de datos
+
                         SimpleGrantedAuthority autoridad = new SimpleGrantedAuthority(
-                                "ROLE_" + usuario.getRol().name());
+                                "ROLE_" + usuario.getRol().getCodigo());
 
                         UsernamePasswordAuthenticationToken autenticacion = new UsernamePasswordAuthenticationToken(
                                 usuario.getCorreo(),
@@ -72,12 +72,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         autenticacion.setDetails(
                                 new WebAuthenticationDetailsSource().buildDetails(request));
 
-                        // 7. Registrar la autenticación en Spring Security
+
                         SecurityContextHolder.getContext().setAuthentication(autenticacion);
                     });
         }
 
-        // 8. Continuar con el resto de la cadena
+
         filterChain.doFilter(request, response);
     }
 }

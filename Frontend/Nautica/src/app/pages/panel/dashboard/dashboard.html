@@ -1,0 +1,172 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-graph-up"></i> Dashboard gerencial</h2>
+    <p class="text-muted small mb-0">Inscripción de socios: demanda, clasificación de postulantes y avance del flujo.</p>
+  </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargar()">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+@if (datos(); as d) {
+  <!-- ================= KPIs ================= -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-xl">
+      <div class="kpi">
+        <div class="kpi-label">Solicitudes totales</div>
+        <div class="kpi-valor">{{ d.totalSolicitudes }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="kpi">
+        <div class="kpi-label">Por verificar</div>
+        <div class="kpi-valor">{{ d.pendientesVerificacion }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="kpi">
+        <div class="kpi-label">Por aprobar</div>
+        <div class="kpi-valor">{{ d.pendientesAprobacion }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="kpi">
+        <div class="kpi-label">Socios activos</div>
+        <div class="kpi-valor">{{ d.sociosActivos }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-xl">
+      <div class="kpi">
+        <div class="kpi-label">Tasa de aprobación</div>
+        <div class="kpi-valor">{{ d.tasaAprobacion | number: '1.0-1' }}%</div>
+        <div class="kpi-nota">aprobadas / resueltas por el Jefe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Chart 1: ÁREA ================= -->
+  <div class="card tarjeta mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h3 class="chart-titulo">Solicitudes de inscripción recibidas por día</h3>
+          <p class="chart-sub">Últimos 14 días · gráfico de área</p>
+        </div>
+        <button type="button" class="btn btn-link btn-sm" (click)="alternarTabla('area')">
+          <i class="bi bi-table"></i> {{ tablas()['area'] ? 'Ver gráfico' : 'Ver tabla' }}
+        </button>
+      </div>
+      @if (!tablas()['area']) {
+        <apx-chart
+          [series]="areaSeries()"
+          [chart]="areaChart"
+          [xaxis]="areaXaxis()"
+          [yaxis]="areaYaxis"
+          [stroke]="areaStroke"
+          [fill]="areaFill"
+          [colors]="[colores[0]]"
+          [dataLabels]="sinEtiquetas"
+          [tooltip]="areaTooltip"
+          [grid]="grid"
+        ></apx-chart>
+      } @else {
+        <div class="table-responsive tabla-datos">
+          <table class="table table-sm">
+            <thead><tr><th>Fecha</th><th class="text-end">Solicitudes</th></tr></thead>
+            <tbody>
+              @for (p of d.solicitudesPorDia; track p.fecha) {
+                <tr><td>{{ fechaCorta(p.fecha) }}</td><td class="text-end">{{ p.cantidad }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- ================= Chart 2: RADIALBAR ================= -->
+    <div class="col-lg-6">
+      <div class="card tarjeta h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h3 class="chart-titulo">Clasificación de postulantes verificados</h3>
+              <p class="chart-sub">Política del club: solo se acepta al "pagador" · radialBar</p>
+            </div>
+            <button type="button" class="btn btn-link btn-sm" (click)="alternarTabla('radial')">
+              <i class="bi bi-table"></i> {{ tablas()['radial'] ? 'Ver gráfico' : 'Ver tabla' }}
+            </button>
+          </div>
+          @if (!tablas()['radial']) {
+            <apx-chart
+              [series]="radialSeries()"
+              [labels]="radialLabels()"
+              [chart]="radialChart"
+              [plotOptions]="radialPlot()"
+              [stroke]="radialStroke"
+              [colors]="colores.slice(0, 3)"
+              [legend]="radialLegend"
+            ></apx-chart>
+          } @else {
+            <div class="table-responsive tabla-datos">
+              <table class="table table-sm">
+                <thead><tr><th>Clasificación</th><th class="text-end">Postulantes</th><th class="text-end">%</th></tr></thead>
+                <tbody>
+                  @for (c of d.porClasificacion; track c.codigo) {
+                    <tr><td>{{ c.etiqueta }}</td><td class="text-end">{{ c.cantidad }}</td><td class="text-end">{{ c.porcentaje }}%</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Chart 3: TREEMAP ================= -->
+    <div class="col-lg-6">
+      <div class="card tarjeta h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h3 class="chart-titulo">Solicitudes por etapa del flujo</h3>
+              <p class="chart-sub">El área de cada bloque es proporcional a la cantidad · treemap</p>
+            </div>
+            <button type="button" class="btn btn-link btn-sm" (click)="alternarTabla('treemap')">
+              <i class="bi bi-table"></i> {{ tablas()['treemap'] ? 'Ver gráfico' : 'Ver tabla' }}
+            </button>
+          </div>
+          @if (!tablas()['treemap']) {
+            <apx-chart
+              [series]="treemapSeries()"
+              [chart]="treemapChart"
+              [plotOptions]="treemapPlot"
+              [dataLabels]="treemapLabels"
+              [stroke]="treemapStroke"
+              [legend]="treemapLegend"
+              [tooltip]="treemapTooltip"
+            ></apx-chart>
+          } @else {
+            <div class="table-responsive tabla-datos">
+              <table class="table table-sm">
+                <thead><tr><th>Etapa</th><th class="text-end">Solicitudes</th><th class="text-end">%</th></tr></thead>
+                <tbody>
+                  @for (e of d.porEstado; track e.codigo) {
+                    <tr>
+                      <td><span class="punto" [style.background]="colorEstado(e.codigo)"></span>{{ e.etiqueta }}</td>
+                      <td class="text-end">{{ e.cantidad }}</td>
+                      <td class="text-end">{{ e.porcentaje }}%</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center text-muted py-5">Cargando indicadores...</div>
+}
