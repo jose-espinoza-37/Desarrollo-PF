@@ -1,0 +1,185 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-clipboard-check"></i> Verificar solicitudes</h2>
+    <p class="text-muted mb-0 small">
+      Verifica los datos del postulante, consulta su historial con otros clubes y clasifícalo.
+      Solo los <strong>pagadores</strong> pasan a aprobación.
+    </p>
+  </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargar()">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+@if (duplicadas() > 0) {
+  <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div>
+      <strong>Atención:</strong> {{ duplicadas() }} solicitud(es) tienen un DNI que ya aparece en otra solicitud.
+      Revisa que no se trate de una doble inscripción.
+    </div>
+  </div>
+}
+
+<div class="card tarjeta">
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input class="form-control" [formControl]="filtroControl" placeholder="Buscar por nombre, DNI o código"
+            [class.is-invalid]="filtroControl.invalid" />
+        </div>
+        @if (filtroControl.invalid) {
+          <div class="text-danger small mt-1">Solo letras, números, espacios y guiones.</div>
+        }
+      </div>
+      <div class="col-md-7 text-md-end small text-muted align-self-center mt-2 mt-md-0">
+        {{ filtradas().length }} solicitud(es) pendiente(s)
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Postulante</th>
+            <th>DNI</th>
+            <th>Embarcaciones</th>
+            <th>Fecha</th>
+            <th class="text-end">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of filtradas() | paginate: { itemsPerPage: 8, currentPage: pagina(), id: 'verificar' }; track s.id) {
+            <tr [class.table-warning]="s.dniDuplicado">
+              <td><code [title]="s.codigo">{{ codigoCorto(s.codigo) }}</code></td>
+              <td>
+                <div class="fw-semibold">{{ s.nombres }} {{ s.apellidos }}</div>
+                <div class="small text-muted">{{ s.correo }}</div>
+              </td>
+              <td>
+                {{ s.dni }}
+                @if (s.dniDuplicado) {
+                  <span class="badge text-bg-danger ms-1" title="Este DNI aparece en {{ s.solicitudesConMismoDni }} solicitudes">
+                    <i class="bi bi-exclamation-triangle"></i> Duplicado
+                  </span>
+                }
+              </td>
+              <td>{{ s.poseeEmbarcacion ? s.cantidadEmbarcaciones : 'No posee' }}</td>
+              <td class="small">{{ s.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-primario" (click)="abrir(s, modalVerificar)">
+                  <i class="bi bi-search"></i> Verificar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                @if (cargado()) { No hay solicitudes pendientes de verificación. } @else { Cargando... }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (filtradas().length > 8) {
+      <div class="d-flex justify-content-center mt-3">
+        <pagination-controls id="verificar" (pageChange)="pagina.set($event)" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ================= Modal de verificación ================= -->
+<ng-template #modalVerificar let-modal>
+  @if (seleccionada(); as s) {
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title h5 mb-0">Verificar solicitud <code>{{ codigoCorto(s.codigo) }}</code></h3>
+        <small class="text-muted font-monospace">{{ s.codigo }}</small>
+      </div>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      @if (antecedentes().length > 0) {
+        <div class="alert alert-danger small mb-4">
+          <div class="mb-2">
+            <i class="bi bi-exclamation-octagon-fill"></i>
+            El DNI <strong>{{ s.dni }}</strong> ya tiene {{ antecedentes().length }} solicitud(es) anterior(es).
+            Compara los datos antes de continuar (posible doble inscripción).
+          </div>
+          <table class="table table-sm table-borderless mb-0 small">
+            <thead><tr><th>Código</th><th>Fecha</th><th>Estado</th><th>Motivo / verificación</th></tr></thead>
+            <tbody>
+              @for (a of antecedentes(); track a.id) {
+                <tr>
+                  <td><code [title]="a.codigo">{{ codigoCorto(a.codigo) }}</code></td>
+                  <td>{{ a.fechaSolicitud | date: 'dd/MM/yyyy' }}</td>
+                  <td><span class="badge {{ claseEstado(a.estado) }}">{{ etiquetaEstado(a.estado) }}</span></td>
+                  <td>{{ a.motivoDesaprobacion ?? a.resultadoVerificacion ?? '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="row g-3 mb-4 datos">
+        <div class="col-sm-6"><span>Nombres</span>{{ s.nombres }} {{ s.apellidos }}</div>
+        <div class="col-sm-3"><span>DNI</span>{{ s.dni }}</div>
+        <div class="col-sm-3"><span>Edad</span>{{ edad(s.fechaNacimiento) }} años</div>
+        <div class="col-sm-6"><span>Correo</span>{{ s.correo }}</div>
+        <div class="col-sm-3"><span>Celular</span>{{ s.celular }}</div>
+        <div class="col-sm-3"><span>Embarcaciones</span>{{ s.poseeEmbarcacion ? s.cantidadEmbarcaciones : 'No posee' }}</div>
+        <div class="col-12"><span>Dirección</span>{{ s.direccion }}</div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <label class="form-label fw-semibold">Clasificación del postulante *</label>
+        <div class="row g-2 mb-1">
+          @for (op of opciones; track op[0]) {
+            <div class="col-md-4">
+              <input type="radio" class="btn-check" [id]="'clas-' + op[0]" [value]="op[0]" formControlName="clasificacion" />
+              <label class="btn btn-outline-secondary w-100 h-100 text-start opcion" [for]="'clas-' + op[0]">
+                <span class="badge {{ op[1].clase }} mb-1">{{ op[1].etiqueta }}</span>
+                <span class="d-block small">{{ op[1].descripcion }}</span>
+              </label>
+            </div>
+          }
+        </div>
+        @if (invalido('clasificacion')) {
+          <div class="text-danger small mb-2">Selecciona una clasificación.</div>
+        }
+
+        <label class="form-label fw-semibold mt-3" for="resultado">Resultado de la verificación con otros clubes *</label>
+        <textarea id="resultado" rows="3" class="form-control" formControlName="resultadoVerificacion" maxlength="500"
+          placeholder="Ej. Club Regatas Lima confirma pagos puntuales en los últimos 2 años."
+          [class.is-invalid]="invalido('resultadoVerificacion')"></textarea>
+        <div class="d-flex justify-content-between">
+          <div>
+            @if (invalido('resultadoVerificacion')) {
+              <div class="text-danger small">
+                @if (form.controls.resultadoVerificacion.hasError('required')) { Registra el resultado de la verificación. }
+                @else if (form.controls.resultadoVerificacion.hasError('minlength')) { Mínimo 10 caracteres. }
+                @else if (form.controls.resultadoVerificacion.hasError('pattern')) { Contiene caracteres no permitidos. }
+                @else { Máximo 500 caracteres. }
+              </div>
+            }
+          </div>
+          <small class="text-muted">{{ form.controls.resultadoVerificacion.value.length }}/500</small>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancelar</button>
+      <button type="button" class="btn btn-primario" [disabled]="guardando()" (click)="guardar()">
+        @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        Registrar verificación
+      </button>
+    </div>
+  }
+</ng-template>

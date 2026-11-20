@@ -1,0 +1,232 @@
+<section class="solicitud-section py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h1 class="section-title">Solicitud de inscripción</h1>
+      <p class="text-muted mx-auto" style="max-width: 640px">
+        Completa tus datos para postular como socio del Club Náutico Poseidón.
+        No necesitas tener embarcación para ser socio.
+      </p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <!-- ================= Formulario HU08 ================= -->
+      <div class="col-lg-8">
+        <div class="card tarjeta">
+          <div class="card-body p-4">
+            <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+              <h2 class="h6 subtitulo"><i class="bi bi-person-vcard"></i> Datos personales</h2>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="nombres">Nombres *</label>
+                  <input id="nombres" class="form-control" formControlName="nombres" maxlength="80"
+                    [class.is-invalid]="invalido('nombres')" placeholder="Ej. Ana María" />
+                  @if (invalido('nombres')) {
+                    <div class="invalid-feedback">
+                      @if (error('nombres', 'required')) { Los nombres son obligatorios. }
+                      @else if (error('nombres', 'pattern')) { Solo letras, espacios, apóstrofe o guion. }
+                      @else { Debe tener entre 2 y 80 caracteres. }
+                    </div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="apellidos">Apellidos *</label>
+                  <input id="apellidos" class="form-control" formControlName="apellidos" maxlength="80"
+                    [class.is-invalid]="invalido('apellidos')" placeholder="Ej. Torres Quispe" />
+                  @if (invalido('apellidos')) {
+                    <div class="invalid-feedback">
+                      @if (error('apellidos', 'required')) { Los apellidos son obligatorios. }
+                      @else if (error('apellidos', 'pattern')) { Solo letras, espacios, apóstrofe o guion. }
+                      @else { Debe tener entre 2 y 80 caracteres. }
+                    </div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="dni">DNI *</label>
+                  <input id="dni" class="form-control" formControlName="dni" maxlength="8" inputmode="numeric"
+                    (input)="soloDigitos(form.controls.dni)" [class.is-invalid]="invalido('dni')" placeholder="8 dígitos" />
+                  @if (invalido('dni')) {
+                    <div class="invalid-feedback">
+                      @if (error('dni', 'required')) { El DNI es obligatorio. }
+                      @else { El DNI debe tener exactamente 8 dígitos. }
+                    </div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="fechaNacimiento">Fecha de nacimiento *</label>
+                  <input id="fechaNacimiento" type="date" class="form-control" formControlName="fechaNacimiento"
+                    [max]="hoy" [class.is-invalid]="invalido('fechaNacimiento')" />
+                  @if (invalido('fechaNacimiento')) {
+                    <div class="invalid-feedback">
+                      @if (error('fechaNacimiento', 'required')) { La fecha de nacimiento es obligatoria. }
+                      @else if (error('fechaNacimiento', 'menorDeEdad')) { Debes ser mayor de 18 años. }
+                      @else { Ingresa una fecha válida. }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <h2 class="h6 subtitulo"><i class="bi bi-telephone"></i> Contacto</h2>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="correo">Correo electrónico *</label>
+                  <input id="correo" type="email" class="form-control" formControlName="correo" maxlength="150"
+                    [class.is-invalid]="invalido('correo')" placeholder="nombre@dominio.com" />
+                  @if (invalido('correo')) {
+                    <div class="invalid-feedback">
+                      @if (error('correo', 'required')) { El correo es obligatorio. }
+                      @else { Ingresa un correo válido (ejemplo: nombre&#64;dominio.com). }
+                    </div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="celular">Celular *</label>
+                  <input id="celular" class="form-control" formControlName="celular" maxlength="9" inputmode="numeric"
+                    (input)="soloDigitos(form.controls.celular)" [class.is-invalid]="invalido('celular')" placeholder="9XXXXXXXX" />
+                  @if (invalido('celular')) {
+                    <div class="invalid-feedback">
+                      @if (error('celular', 'required')) { El celular es obligatorio. }
+                      @else { Debe tener 9 dígitos y empezar con 9. }
+                    </div>
+                  }
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label" for="direccion">Dirección *</label>
+                  <input id="direccion" class="form-control" formControlName="direccion" maxlength="200"
+                    [class.is-invalid]="invalido('direccion')" placeholder="Av. Paseo Marino 603, Callao" />
+                  @if (invalido('direccion')) {
+                    <div class="invalid-feedback">
+                      @if (error('direccion', 'required')) { La dirección es obligatoria. }
+                      @else if (error('direccion', 'pattern')) { La dirección contiene caracteres no permitidos. }
+                      @else { Debe tener entre 5 y 200 caracteres. }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <h2 class="h6 subtitulo"><i class="bi bi-water"></i> Embarcaciones</h2>
+              <div class="row g-3 mb-4 align-items-end">
+                <div class="col-md-7">
+                  <div class="form-check form-switch">
+                    <input id="poseeEmbarcacion" class="form-check-input" type="checkbox" formControlName="poseeEmbarcacion" />
+                    <label class="form-check-label" for="poseeEmbarcacion">Poseo una o más embarcaciones</label>
+                  </div>
+                  <div class="form-text">Si eres aprobado, registrarás una ficha por cada embarcación.</div>
+                </div>
+                @if (form.controls.poseeEmbarcacion.value) {
+                  <div class="col-md-5">
+                    <label class="form-label" for="cantidad">¿Cuántas? *</label>
+                    <input id="cantidad" type="number" min="1" max="20" class="form-control"
+                      formControlName="cantidadEmbarcaciones" [class.is-invalid]="invalido('cantidadEmbarcaciones')" />
+                    @if (invalido('cantidadEmbarcaciones')) {
+                      <div class="invalid-feedback">Ingresa un número entre 1 y 20.</div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <h2 class="h6 subtitulo"><i class="bi bi-key"></i> Acceso al sistema</h2>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="password">Contraseña *</label>
+                  <div class="input-group has-validation">
+                    <input id="password" class="form-control" formControlName="password" maxlength="72"
+                      [type]="verPassword() ? 'text' : 'password'" autocomplete="new-password"
+                      [class.is-invalid]="invalido('password')" />
+                    <button type="button" class="btn btn-outline-secondary" (click)="verPassword.set(!verPassword())"
+                      [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                      <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()"></i>
+                    </button>
+                    @if (invalido('password')) {
+                      <div class="invalid-feedback">
+                        @if (error('password', 'required')) { La contraseña es obligatoria. }
+                        @else { 8 a 72 caracteres sin espacios, con al menos una letra y un número. }
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="confirmar">Confirmar contraseña *</label>
+                  <input id="confirmar" class="form-control" formControlName="confirmarPassword" maxlength="72"
+                    [type]="verPassword() ? 'text' : 'password'" autocomplete="new-password"
+                    [class.is-invalid]="invalido('confirmarPassword') || passwordsNoCoinciden" />
+                  @if (invalido('confirmarPassword') || passwordsNoCoinciden) {
+                    <div class="invalid-feedback">
+                      @if (error('confirmarPassword', 'required')) { Confirma tu contraseña. }
+                      @else { Las contraseñas no coinciden. }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="form-check mb-4">
+                <input id="politicas" class="form-check-input" type="checkbox" formControlName="aceptaPoliticas"
+                  [class.is-invalid]="invalido('aceptaPoliticas')" />
+                <label class="form-check-label small" for="politicas">
+                  Autorizo la verificación de mis datos y de mi historial de pagos con otros clubes.
+                </label>
+                @if (invalido('aceptaPoliticas')) {
+                  <div class="invalid-feedback">Debes aceptar la verificación para continuar.</div>
+                }
+              </div>
+
+              <button type="submit" class="btn btn-enviar w-100" [disabled]="enviando()">
+                @if (enviando()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span> Enviando...
+                } @else {
+                  Enviar solicitud <i class="bi bi-send ms-1"></i>
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= Seguimiento ================= -->
+      <div class="col-lg-4">
+        <div class="card tarjeta">
+          <div class="card-body p-4">
+            <h2 class="h6 subtitulo"><i class="bi bi-search"></i> Consulta tu solicitud</h2>
+            <form [formGroup]="formSeguimiento" (ngSubmit)="consultar()" novalidate>
+              <label class="form-label" for="codigo">Código de seguimiento</label>
+              <input id="codigo" class="form-control mb-1 codigo-input" formControlName="codigo"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" maxlength="36" autocomplete="off" spellcheck="false"
+                [class.is-invalid]="formSeguimiento.controls.codigo.invalid && formSeguimiento.controls.codigo.touched" />
+              @if (formSeguimiento.controls.codigo.invalid && formSeguimiento.controls.codigo.touched) {
+                <div class="invalid-feedback d-block">Pega el código que recibiste al enviar tu solicitud (36 caracteres).</div>
+              }
+              <button type="submit" class="btn btn-outline-primary w-100 mt-2">Consultar</button>
+            </form>
+
+            @if (seguimiento(); as s) {
+              <div class="resultado mt-4">
+                <div class="small text-muted">Postulante</div>
+                <div class="fw-bold mb-2">{{ s.nombres }}</div>
+                <div class="small text-muted">Estado</div>
+                <span class="badge {{ claseEstado(s.estado) }} mb-2">{{ etiquetaEstado(s.estado) }}</span>
+                <div class="small text-muted">Fecha de solicitud</div>
+                <div class="mb-2">{{ s.fechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}</div>
+                @if (s.motivoDesaprobacion) {
+                  <div class="alert alert-danger small mb-0">
+                    <strong>Motivo de la desaprobación:</strong> {{ s.motivoDesaprobacion }}
+                    <br />Puedes subsanar las observaciones y presentar una nueva solicitud.
+                  </div>
+                }
+                @if (s.estado === 'APROBADA') {
+                  <div class="alert alert-success small mb-0">
+                    ¡Bienvenido(a) al club! Ya puedes <a routerLink="/login">iniciar sesión</a> con tu correo y contraseña.
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,44 @@
+.solicitud-section {
+  background: var(--bg-light);
+}
+
+.tarjeta {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.subtitulo {
+  color: var(--secondary-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-enviar {
+  padding: 0.75rem;
+  border: none;
+  background: var(--accent-color);
+  color: var(--primary-color);
+  font-weight: 700;
+
+  &:hover:not(:disabled) {
+    background: #b8924a;
+  }
+}
+
+.resultado {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.codigo-input {
+  font-family: monospace;
+  font-size: 0.85rem;
+}
