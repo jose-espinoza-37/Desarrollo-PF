@@ -1,5 +1,5 @@
-
+// Producción (ng build): URL del backend desplegado en Render
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8080/api',
+  production: true,
+  apiUrl: 'https://CAMBIAR-POR-TU-BACKEND.onrender.com/api',
 };

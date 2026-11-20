@@ -38,49 +38,57 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler) throws Exception {
 
         http
-
+                // CSRF deshabilitado: el token viaja en el encabezado Authorization,
+                // no en una cookie que el navegador envíe automáticamente.
                 .csrf(csrf -> csrf.disable())
 
+                // Permitir que Angular (localhost:4200) consuma la API.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-
+                // Reglas de acceso.
                 .authorizeHttpRequests(auth -> auth
-
+                        // Públicos: registro e inicio de sesión.
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/registro",
                                 "/api/auth/login")
                         .permitAll()
 
-
+                        // Públicos: solicitud de inscripción (HU08) y su seguimiento.
                         .requestMatchers(HttpMethod.POST, "/api/solicitudes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/solicitudes/seguimiento/**").permitAll()
 
-
+                        // Bandejas de verificación y aprobación (HU09, HU10).
                         .requestMatchers("/api/solicitudes/**").hasAnyRole("GERENTE", "ATENCION_CLIENTE")
 
+                        // Panel gerencial (charts).
                         .requestMatchers("/api/dashboard/**").hasAnyRole("GERENTE", "ADMINISTRACION")
 
-
+                        // Ruta interna de Spring para mostrar errores.
                         .requestMatchers("/error").permitAll()
 
+                        // Estado de la API (para comprobar el despliegue).
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
+
+                        // Exclusivo de la gerencia y administración.
                         .requestMatchers("/api/admin/**").hasAnyRole("GERENTE", "ADMINISTRACION")
 
                         // Todo lo demás exige un usuario autenticado.
                         .anyRequest().authenticated())
 
+                // Respuestas JSON para 401 y 403.
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
 
-
+                // Sin autenticación básica ni formulario de login.
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
 
-
+                // La API no guarda sesiones: todo depende del token.
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-
+                // El filtro JWT se ejecuta antes del filtro de usuario/contraseña.
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
 
@@ -91,7 +99,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuracion = new CorsConfiguration();
-
+        // Orígenes permitidos separados por coma (local + dominio desplegado).
         configuracion.setAllowedOrigins(Arrays.stream(origenesPermitidos.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
