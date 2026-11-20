@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Manejar errores de validacion de los DTO
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> manejarErroresValidacion(
             MethodArgumentNotValidException ex) {
@@ -65,6 +65,22 @@ public class GlobalExceptionHandler {
         return crearRespuesta(
                 HttpStatus.CONFLICT,
                 "No se pudo guardar la informacion porque existe un conflicto con los datos.");
+    }
+
+    // Recurso inexistente (ej. solicitud con un id o código que no existe)
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<Map<String, Object>> manejarNoEncontrado(
+            RecursoNoEncontradoException ex) {
+
+        return crearRespuesta(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    // Acción no permitida en el estado actual (ej. aprobar una solicitud pendiente)
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> manejarEstadoInvalido(
+            IllegalStateException ex) {
+
+        return crearRespuesta(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // Manejar errores inesperados

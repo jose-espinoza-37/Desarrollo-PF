@@ -24,7 +24,7 @@ public class AuthController {
                 this.authService = authService;
         }
 
-        // REGISTRO DE SOCIOS
+
         @PostMapping("/registro")
         public ResponseEntity<Map<String, String>> registrarSocio(
                         @Valid @RequestBody RegistroRequest request) {
@@ -44,7 +44,6 @@ public class AuthController {
                                 .body(respuesta);
         }
 
-        // INICIO DE SESIÓN (devuelve JWT)
         @PostMapping("/login")
         public ResponseEntity<AuthResponse> iniciarSesion(
                         @Valid @RequestBody LoginRequest request) {

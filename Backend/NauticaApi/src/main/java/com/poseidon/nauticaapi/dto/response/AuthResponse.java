@@ -1,6 +1,6 @@
 package com.poseidon.nauticaapi.dto.response;
 
-import com.poseidon.nauticaapi.entity.Rol;
+import java.util.List;
 
 public class AuthResponse {
 
@@ -10,7 +10,9 @@ public class AuthResponse {
     private String nombres;
     private String apellidos;
     private String correo;
-    private Rol rol;
+    private String rol;
+    private String rolNombre;
+    private List<ModuloResponse> modulos;
 
     public AuthResponse(
             String accessToken,
@@ -18,7 +20,9 @@ public class AuthResponse {
             String nombres,
             String apellidos,
             String correo,
-            Rol rol) {
+            String rol,
+            String rolNombre,
+            List<ModuloResponse> modulos) {
 
         this.accessToken = accessToken;
         this.tokenType = "Bearer";
@@ -27,33 +31,17 @@ public class AuthResponse {
         this.apellidos = apellidos;
         this.correo = correo;
         this.rol = rol;
+        this.rolNombre = rolNombre;
+        this.modulos = modulos;
     }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public String getTokenType() {
-        return tokenType;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getNombres() {
-        return nombres;
-    }
-
-    public String getApellidos() {
-        return apellidos;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public Rol getRol() {
-        return rol;
-    }
+    public String getAccessToken() { return accessToken; }
+    public String getTokenType() { return tokenType; }
+    public Long getId() { return id; }
+    public String getNombres() { return nombres; }
+    public String getApellidos() { return apellidos; }
+    public String getCorreo() { return correo; }
+    public String getRol() { return rol; }
+    public String getRolNombre() { return rolNombre; }
+    public List<ModuloResponse> getModulos() { return modulos; }
 }

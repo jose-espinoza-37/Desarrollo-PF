@@ -18,11 +18,17 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.cors.allowed-origins:http://localhost:4200}")
+    private String origenesPermitidos;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -32,44 +38,49 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler) throws Exception {
 
         http
-                // CSRF deshabilitado: el token viaja en el encabezado Authorization,
-                // no en una cookie que el navegador envíe automáticamente.
+
                 .csrf(csrf -> csrf.disable())
 
-                // Permitir que Angular (localhost:4200) consuma la API.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Reglas de acceso.
+
                 .authorizeHttpRequests(auth -> auth
-                        // Públicos: registro e inicio de sesión.
+
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/registro",
                                 "/api/auth/login")
                         .permitAll()
 
-                        // Ruta interna de Spring para mostrar errores.
+
+                        .requestMatchers(HttpMethod.POST, "/api/solicitudes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/seguimiento/**").permitAll()
+
+
+                        .requestMatchers("/api/solicitudes/**").hasAnyRole("GERENTE", "ATENCION_CLIENTE")
+
+                        .requestMatchers("/api/dashboard/**").hasAnyRole("GERENTE", "ADMINISTRACION")
+
+
                         .requestMatchers("/error").permitAll()
 
-                        // Exclusivo de administradores.
-                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/admin/**").hasAnyRole("GERENTE", "ADMINISTRACION")
 
                         // Todo lo demás exige un usuario autenticado.
                         .anyRequest().authenticated())
 
-                // Respuestas JSON para 401 y 403.
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
 
-                // Sin autenticación básica ni formulario de login.
+
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
 
-                // La API no guarda sesiones: todo depende del token.
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // El filtro JWT se ejecuta antes del filtro de usuario/contraseña.
+
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
 
@@ -80,7 +91,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuracion = new CorsConfiguration();
-        configuracion.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        configuracion.setAllowedOrigins(Arrays.stream(origenesPermitidos.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList());
         configuracion.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuracion.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
