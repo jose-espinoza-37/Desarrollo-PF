@@ -1,10 +1,17 @@
-
 package com.poseidon.nauticaapi.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegistroRequest {
 
     @NotBlank(message = "Los nombres son obligatorios.")
@@ -23,39 +30,4 @@ public class RegistroRequest {
     @NotBlank(message = "La contraseña es obligatoria.")
     @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres.")
     private String password;
-
-    public RegistroRequest() {
-    }
-
-    public String getNombres() {
-        return nombres;
-    }
-
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
-
-    public String getApellidos() {
-        return apellidos;
-    }
-
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -1,11 +1,22 @@
 package com.poseidon.nauticaapi.dto.response;
 
+import com.poseidon.nauticaapi.entity.Usuario;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+/** Respuesta del login: token JWT, datos del usuario y su menú. */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthResponse {
-
     private String accessToken;
-    private String tokenType;
+    @Builder.Default
+    private String tokenType = "Bearer";
     private Long id;
     private String nombres;
     private String apellidos;
@@ -14,34 +25,16 @@ public class AuthResponse {
     private String rolNombre;
     private List<ModuloResponse> modulos;
 
-    public AuthResponse(
-            String accessToken,
-            Long id,
-            String nombres,
-            String apellidos,
-            String correo,
-            String rol,
-            String rolNombre,
-            List<ModuloResponse> modulos) {
-
-        this.accessToken = accessToken;
-        this.tokenType = "Bearer";
-        this.id = id;
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.correo = correo;
-        this.rol = rol;
-        this.rolNombre = rolNombre;
-        this.modulos = modulos;
+    public static AuthResponse fromEntity(Usuario usuario, String token) {
+        return AuthResponse.builder()
+                .accessToken(token)
+                .id(usuario.getId())
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .correo(usuario.getCorreo())
+                .rol(usuario.getRol().getCodigo())
+                .rolNombre(usuario.getRol().getNombre())
+                .modulos(ModuloResponse.fromEntities(usuario.getRol().getModulosActivosOrdenados()))
+                .build();
     }
-
-    public String getAccessToken() { return accessToken; }
-    public String getTokenType() { return tokenType; }
-    public Long getId() { return id; }
-    public String getNombres() { return nombres; }
-    public String getApellidos() { return apellidos; }
-    public String getCorreo() { return correo; }
-    public String getRol() { return rol; }
-    public String getRolNombre() { return rolNombre; }
-    public List<ModuloResponse> getModulos() { return modulos; }
 }
