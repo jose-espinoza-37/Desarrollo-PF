@@ -63,20 +63,3 @@ export interface VerificacionRequest {
 }
 
 
-export interface Conteo {
-  codigo: string;
-  etiqueta: string;
-  cantidad: number;
-  porcentaje: number;
-}
-
-export interface DashboardResumen {
-  totalSolicitudes: number;
-  pendientesVerificacion: number;
-  pendientesAprobacion: number;
-  sociosActivos: number;
-  tasaAprobacion: number;
-  solicitudesPorDia: { fecha: string; cantidad: number }[];
-  porClasificacion: Conteo[];
-  porEstado: Conteo[];
-}

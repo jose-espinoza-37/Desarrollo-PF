@@ -56,10 +56,20 @@
   overflow-y: auto;
 }
 
-.punto {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-right: 8px;
-  border-radius: 2px;
+.kpi-stat .kpi-valor {
+  font-size: 1.45rem;
+}
+
+.lectura {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: #f4f8fc;
+  color: var(--text-dark);
+  font-size: 0.82rem;
+
+  i {
+    color: #eda100;
+    margin-right: 4px;
+  }
 }
