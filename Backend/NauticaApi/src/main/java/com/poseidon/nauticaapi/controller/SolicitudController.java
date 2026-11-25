@@ -4,45 +4,32 @@ import com.poseidon.nauticaapi.dto.request.DesaprobacionRequest;
 import com.poseidon.nauticaapi.dto.request.SolicitudRequest;
 import com.poseidon.nauticaapi.dto.request.VerificacionRequest;
 import com.poseidon.nauticaapi.dto.response.SeguimientoResponse;
+import com.poseidon.nauticaapi.dto.response.SolicitudCreadaResponse;
 import com.poseidon.nauticaapi.dto.response.SolicitudResponse;
-import com.poseidon.nauticaapi.entity.SolicitudSocio;
 import com.poseidon.nauticaapi.service.SolicitudService;
 import com.poseidon.nauticaapi.exception.RecursoNoEncontradoException;
 
 import jakarta.validation.Valid;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/solicitudes")
 public class SolicitudController {
 
-    private final SolicitudService solicitudService;
-
-    public SolicitudController(SolicitudService solicitudService) {
-        this.solicitudService = solicitudService;
-    }
+    @Autowired
+    private SolicitudService solicitudService;
 
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> registrar(@Valid @RequestBody SolicitudRequest request) {
-        SolicitudSocio s = solicitudService.registrar(request);
-
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje", "Solicitud registrada correctamente.");
-        respuesta.put("codigo", s.getCodigo());
-        respuesta.put("estado", s.getEstado());
-        respuesta.put("fechaSolicitud", s.getFechaSolicitud());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+    public ResponseEntity<SolicitudCreadaResponse> registrar(@Valid @RequestBody SolicitudRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitudService.registrar(request));
     }
 
 
@@ -89,6 +76,6 @@ public class SolicitudController {
             @Valid @RequestBody DesaprobacionRequest request,
             Authentication autenticacion) {
 
-        return ResponseEntity.ok(solicitudService.desaprobar(id, request.motivo(), autenticacion.getName()));
+        return ResponseEntity.ok(solicitudService.desaprobar(id, request.getMotivo(), autenticacion.getName()));
     }
 }

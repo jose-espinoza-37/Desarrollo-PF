@@ -5,53 +5,35 @@ import com.poseidon.nauticaapi.dto.request.RegistroRequest;
 import com.poseidon.nauticaapi.dto.response.AuthResponse;
 import com.poseidon.nauticaapi.entity.Usuario;
 import com.poseidon.nauticaapi.service.AuthService;
-
+import com.poseidon.nauticaapi.util.ObjectResponse;
 import jakarta.validation.Valid;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-        private final AuthService authService;
+    @Autowired
+    private AuthService authService;
 
-        public AuthController(AuthService authService) {
-                this.authService = authService;
-        }
+    @PostMapping("/registro")
+    public ResponseEntity<ObjectResponse<String>> registrarSocio(@Valid @RequestBody RegistroRequest request) {
+        Usuario usuario = authService.registrarSocio(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ObjectResponse.<String>builder()
+                .success(true)
+                .message("Socio registrado correctamente.")
+                .object(usuario.getCorreo())
+                .build());
+    }
 
-
-        @PostMapping("/registro")
-        public ResponseEntity<Map<String, String>> registrarSocio(
-                        @Valid @RequestBody RegistroRequest request) {
-
-                Usuario usuario = authService.registrarSocio(
-                                request.getNombres(),
-                                request.getApellidos(),
-                                request.getCorreo(),
-                                request.getPassword());
-
-                Map<String, String> respuesta = Map.of(
-                                "mensaje", "Socio registrado correctamente.",
-                                "correo", usuario.getCorreo());
-
-                return ResponseEntity
-                                .status(HttpStatus.CREATED)
-                                .body(respuesta);
-        }
-
-        @PostMapping("/login")
-        public ResponseEntity<AuthResponse> iniciarSesion(
-                        @Valid @RequestBody LoginRequest request) {
-
-                AuthResponse respuesta = authService.login(
-                                request.getCorreo(),
-                                request.getPassword());
-
-                return ResponseEntity.ok(respuesta);
-        }
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> iniciarSesion(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
 }

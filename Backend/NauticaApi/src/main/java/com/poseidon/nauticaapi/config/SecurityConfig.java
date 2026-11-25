@@ -3,12 +3,14 @@ package com.poseidon.nauticaapi.config;
 import com.poseidon.nauticaapi.security.JwtAuthenticationFilter;
 import com.poseidon.nauticaapi.security.RestAccessDeniedHandler;
 import com.poseidon.nauticaapi.security.RestAuthenticationEntryPoint;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,8 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,76 +30,66 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:4200}")
     private String origenesPermitidos;
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private RestAuthenticationEntryPoint authenticationEntryPoint;
+    @Autowired
+    private RestAccessDeniedHandler accessDeniedHandler;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            RestAuthenticationEntryPoint authenticationEntryPoint,
-            RestAccessDeniedHandler accessDeniedHandler) throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF deshabilitado: el token viaja en el encabezado Authorization,
-                // no en una cookie que el navegador envíe automáticamente.
-                .csrf(csrf -> csrf.disable())
-
-                // Permitir que Angular (localhost:4200) consuma la API.
+                // El token viaja en el encabezado Authorization, no en una cookie: CSRF no aplica
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Reglas de acceso.
                 .authorizeHttpRequests(auth -> auth
-                        // Públicos: registro e inicio de sesión.
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/auth/registro",
-                                "/api/auth/login")
-                        .permitAll()
-
-                        // Públicos: solicitud de inscripción (HU08) y su seguimiento.
+                        // Públicos: inicio de sesión y registro
+                        .requestMatchers(HttpMethod.POST, "/api/auth/registro", "/api/auth/login").permitAll()
+                        // Públicos: solicitud de inscripción (HU08), su seguimiento y los catálogos
                         .requestMatchers(HttpMethod.POST, "/api/solicitudes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/solicitudes/seguimiento/**").permitAll()
-
-                        // Bandejas de verificación y aprobación (HU09, HU10).
+                        .requestMatchers(HttpMethod.GET, "/api/catalogos/**").permitAll()
+                        // Bandejas de verificación y aprobación (HU09, HU10)
                         .requestMatchers("/api/solicitudes/**").hasAnyRole("GERENTE", "ATENCION_CLIENTE")
-
-                        // Panel gerencial (charts).
+                        // Panel gerencial (charts)
                         .requestMatchers("/api/dashboard/**").hasAnyRole("GERENTE", "ADMINISTRACION")
-
-                        // Ruta interna de Spring para mostrar errores.
-                        .requestMatchers("/error").permitAll()
-
-                        // Estado de la API (para comprobar el despliegue).
+                        // HU11: el socio registra sus embarcaciones y documentos
+                        .requestMatchers(HttpMethod.GET, "/api/embarcaciones/mias").hasRole("SOCIO")
+                        .requestMatchers(HttpMethod.POST, "/api/embarcaciones", "/api/embarcaciones/*/documentos").hasRole("SOCIO")
+                        .requestMatchers(HttpMethod.PUT, "/api/embarcaciones/*/verificar").hasAnyRole("SERVICIOS_NAVIEROS", "GERENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/embarcaciones/*").hasRole("SOCIO")
+                        // Documentos: el servicio valida que el socio sea el dueño
+                        .requestMatchers(HttpMethod.GET, "/api/embarcaciones/documentos/**")
+                            .hasAnyRole("SOCIO", "SERVICIOS_NAVIEROS", "GERENTE")
+                        // HU12 y HU13: Servicios Navieros (y Gerencia)
+                        .requestMatchers(HttpMethod.GET, "/api/embarcaciones").hasAnyRole("SERVICIOS_NAVIEROS", "GERENTE")
+                        .requestMatchers("/api/radas/**").hasAnyRole("SERVICIOS_NAVIEROS", "GERENTE")
+                        // Bitácora de auditoría
+                        .requestMatchers("/api/auditoria/**").hasRole("GERENTE")
+                        // Estado de la API, Spring Boot Actuator y página de errores
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
-
-                        // Exclusivo de la gerencia y administración.
-                        .requestMatchers("/api/admin/**").hasAnyRole("GERENTE", "ADMINISTRACION")
-
-                        // Todo lo demás exige un usuario autenticado.
+                        .requestMatchers("/actuator/**", "/error").permitAll()
+                        // Todo lo demás exige un usuario autenticado
                         .anyRequest().authenticated())
-
-                // Respuestas JSON para 401 y 403.
+                // Respuestas JSON para 401 y 403
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
-
-                // Sin autenticación básica ni formulario de login.
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .formLogin(formLogin -> formLogin.disable())
-
-                // La API no guarda sesiones: todo depende del token.
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // El filtro JWT se ejecuta antes del filtro de usuario/contraseña.
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                // La API no guarda sesiones: todo depende del token
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // El filtro JWT se ejecuta antes del filtro de usuario/contraseña
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuracion = new CorsConfiguration();
-        // Orígenes permitidos separados por coma (local + dominio desplegado).
+        // Orígenes permitidos separados por coma (local + dominio desplegado)
         configuracion.setAllowedOrigins(Arrays.stream(origenesPermitidos.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())

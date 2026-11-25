@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,16 +21,14 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UsuarioRepository usuarioRepository;
+    /** Nombre del atributo de la petición con el id del usuario autenticado. */
+    public static final String ATRIBUTO_ID_USUARIO = "idUsuarioAutenticado";
 
-    public JwtAuthenticationFilter(
-            JwtService jwtService,
-            UsuarioRepository usuarioRepository) {
+    @Autowired
+    private JwtService jwtService;
 
-        this.jwtService = jwtService;
-        this.usuarioRepository = usuarioRepository;
-    }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(
@@ -57,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
             usuarioRepository.findByCorreo(correo)
-                    .filter(usuario -> usuario.isActivo() && usuario.getRol() != null)
+                    .filter(usuario -> usuario.getActivo() && usuario.getRol() != null)
                     .ifPresent(usuario -> {
 
 
@@ -74,6 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
                         SecurityContextHolder.getContext().setAuthentication(autenticacion);
+
+                        // El id queda en la petición para la auditoría (evita otra consulta)
+                        request.setAttribute(ATRIBUTO_ID_USUARIO, usuario.getId());
                     });
         }
 
