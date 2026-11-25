@@ -1,0 +1,161 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-patch-check"></i> Verificar embarcaciones</h2>
+    <p class="text-muted mb-0 small">
+      Contrasta cada ficha con los registros de la Dirección General de Capitanías y Guardacostas (DICAPI).
+      Solo las embarcaciones <strong>verificadas</strong> pueden recibir una rada.
+    </p>
+  </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargar()">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'PENDIENTE'" (click)="cambiarPestana('PENDIENTE')">
+      Pendientes <span class="badge text-bg-warning">{{ conteo().PENDIENTE }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'OBSERVADA'" (click)="cambiarPestana('OBSERVADA')">
+      Observadas <span class="badge text-bg-danger">{{ conteo().OBSERVADA }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'VERIFICADA'" (click)="cambiarPestana('VERIFICADA')">
+      Verificadas <span class="badge text-bg-success">{{ conteo().VERIFICADA }}</span>
+    </button>
+  </li>
+</ul>
+
+<div class="card tarjeta">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Embarcación</th><th>Matrícula</th><th>Socio</th><th>Medidas (E × M × C)</th>
+            <th>Docs</th><th>Registro</th><th class="text-end">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of lista() | paginate: { itemsPerPage: 8, currentPage: pagina(), id: 'naves' }; track e.id) {
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ e.nombre }}</div>
+                <div class="small text-muted">{{ etiquetaTipo(e.tipo) }} · {{ e.anioFabricacion }}</div>
+              </td>
+              <td><code>{{ e.matricula }}</code></td>
+              <td class="small">{{ e.socioNombre }}<div class="text-muted">{{ e.socioCorreo }}</div></td>
+              <td class="small">{{ e.eslora | number: '1.2-2' }} × {{ e.manga | number: '1.2-2' }} × {{ e.calado | number: '1.2-2' }} m</td>
+              <td>
+                @if (e.documentos.length > 0) {
+                  <span class="badge text-bg-light">{{ e.documentos.length }}</span>
+                } @else {
+                  <span class="badge text-bg-secondary" title="El socio no adjuntó documentos">0</span>
+                }
+              </td>
+              <td class="small">{{ e.fechaRegistro | date: 'dd/MM/yyyy' }}</td>
+              <td class="text-end">
+                @if (e.estado === 'PENDIENTE') {
+                  <button type="button" class="btn btn-sm btn-primario" (click)="abrir(e, modalVerificar)">
+                    <i class="bi bi-search"></i> Verificar
+                  </button>
+                } @else {
+                  <span class="badge {{ claseEstado(e.estado) }}" [title]="e.observaciones ?? ''">{{ etiquetaEstado(e.estado) }}</span>
+                  @if (e.radaCodigo) { <div class="small text-muted">Rada {{ e.radaCodigo }}</div> }
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="text-center text-muted py-4">
+              {{ cargado() ? 'No hay embarcaciones en esta bandeja.' : 'Cargando...' }}
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (lista().length > 8) {
+      <pagination-controls id="naves" class="mt-3 d-flex justify-content-center" (pageChange)="pagina.set($event)"
+        previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+    }
+  </div>
+</div>
+
+<!-- ================= Modal de verificación ================= -->
+<ng-template #modalVerificar let-modal>
+  @if (seleccionada(); as e) {
+    <div class="modal-header">
+      <h5 class="modal-title">Verificar "{{ e.nombre }}" <code class="ms-1">{{ e.matricula }}</code></h5>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <div class="modal-body">
+        <div class="row g-3 datos mb-3">
+          <div class="col-md-4"><span>Tipo</span>{{ etiquetaTipo(e.tipo) }}</div>
+          <div class="col-md-4"><span>Año</span>{{ e.anioFabricacion }}</div>
+          <div class="col-md-4"><span>Socio</span>{{ e.socioNombre }}</div>
+          <div class="col-md-4"><span>Eslora</span>{{ e.eslora | number: '1.2-2' }} m</div>
+          <div class="col-md-4"><span>Manga</span>{{ e.manga | number: '1.2-2' }} m</div>
+          <div class="col-md-4"><span>Calado</span>{{ e.calado | number: '1.2-2' }} m</div>
+        </div>
+
+        <label class="form-label fw-semibold">Documentos adjuntos</label>
+        @if (e.documentos.length === 0) {
+          <div class="alert alert-secondary small py-2">El socio no adjuntó documentos. Puedes observar la ficha para pedirlos.</div>
+        } @else {
+          <ul class="list-unstyled small">
+            @for (d of e.documentos; track d.id) {
+              <li><button type="button" class="btn btn-link btn-sm p-0" (click)="ver(d.id)">
+                <i class="bi bi-file-earmark"></i> {{ d.tipoDocumento }} · {{ d.nombreArchivo }}</button></li>
+            }
+          </ul>
+        }
+
+        <label class="form-label fw-semibold mt-2">Resultado *</label>
+        <div class="row g-2 mb-1">
+          <div class="col-md-6">
+            <input type="radio" class="btn-check" id="res-ok" value="VERIFICADA" formControlName="resultado" />
+            <label class="btn btn-outline-secondary w-100 text-start opcion" for="res-ok">
+              <span class="badge text-bg-success mb-1">Conforme</span>
+              <span class="d-block small">Los datos coinciden con el registro de Capitanías.</span>
+            </label>
+          </div>
+          <div class="col-md-6">
+            <input type="radio" class="btn-check" id="res-obs" value="OBSERVADA" formControlName="resultado" />
+            <label class="btn btn-outline-secondary w-100 text-start opcion" for="res-obs">
+              <span class="badge text-bg-danger mb-1">Observada</span>
+              <span class="d-block small">Hay diferencias o falta un documento. Se notifica al socio.</span>
+            </label>
+          </div>
+        </div>
+        @if (invalido('resultado')) { <div class="text-danger small">Selecciona el resultado.</div> }
+
+        <label class="form-label fw-semibold mt-3" for="obs">
+          Observaciones {{ form.controls.resultado.value === 'OBSERVADA' ? '*' : '(opcional)' }}
+        </label>
+        <textarea id="obs" rows="3" class="form-control" formControlName="observaciones" maxlength="500"
+          placeholder="Ej. La matrícula registrada en Capitanías no coincide con la declarada."
+          [class.is-invalid]="invalido('observaciones')"></textarea>
+        @if (invalido('observaciones')) {
+          <div class="invalid-feedback">Indica qué debe subsanar el socio (10 a 500 caracteres, sin símbolos especiales).</div>
+        }
+
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="contrastado" formControlName="contrastado"
+            [class.is-invalid]="invalido('contrastado')" />
+          <label class="form-check-label small" for="contrastado">
+            Confirmo que contrasté la matrícula y las medidas con el registro de la DICAPI.
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancelar</button>
+        <button type="submit" class="btn btn-primario" [disabled]="guardando()">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm"></span> } Registrar resultado
+        </button>
+      </div>
+    </form>
+  }
+</ng-template>

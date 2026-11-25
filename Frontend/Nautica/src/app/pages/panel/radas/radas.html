@@ -1,0 +1,163 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-signpost-split"></i> Asignar radas</h2>
+    <p class="text-muted mb-0 small">
+      Elige una embarcación verificada: el sistema sugiere las radas libres donde cabe (eslora, manga y calado),
+      ordenadas por el mejor aprovechamiento del amarre.
+    </p>
+  </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargar()">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="kpi-mini"><span>Radas</span>{{ radas().length }}</div></div>
+  <div class="col-6 col-lg-3"><div class="kpi-mini"><span>Ocupadas</span>{{ ocupadas() }}</div></div>
+  <div class="col-6 col-lg-3"><div class="kpi-mini"><span>Libres</span>{{ radas().length - ocupadas() }}</div></div>
+  <div class="col-6 col-lg-3"><div class="kpi-mini"><span>Ocupación</span>{{ ocupacion() | number: '1.0-1' }}%</div></div>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'asignar'" (click)="pestana.set('asignar')">
+      Asignación <span class="badge text-bg-warning">{{ porAsignar().length }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button type="button" class="nav-link" [class.active]="pestana() === 'historial'" (click)="pestana.set('historial')">
+      Historial de cambios
+    </button>
+  </li>
+</ul>
+
+@if (pestana() === 'asignar') {
+  <div class="row g-4">
+    <!-- Embarcaciones verificadas sin rada -->
+    <div class="col-lg-4">
+      <div class="card tarjeta h-100">
+        <div class="card-body">
+          <h3 class="seccion">1. Embarcaciones por asignar</h3>
+          @for (e of porAsignar(); track e.id) {
+            <button type="button" class="nave w-100 text-start" [class.activa]="seleccionada()?.id === e.id" (click)="elegir(e)">
+              <div class="fw-semibold">{{ e.nombre }} <code class="ms-1">{{ e.matricula }}</code></div>
+              <div class="small text-muted">
+                {{ etiquetaTipo(e.tipo) }} · {{ e.eslora | number: '1.2-2' }} × {{ e.manga | number: '1.2-2' }} × {{ e.calado | number: '1.2-2' }} m
+              </div>
+              <div class="small">{{ e.socioNombre }}</div>
+            </button>
+          } @empty {
+            <p class="text-muted small">No hay embarcaciones verificadas pendientes de rada.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Sugerencias -->
+    <div class="col-lg-8">
+      <div class="card tarjeta mb-4">
+        <div class="card-body">
+          <h3 class="seccion">2. Radas compatibles sugeridas</h3>
+          @if (!seleccionada()) {
+            <p class="text-muted small mb-0">Selecciona una embarcación de la lista.</p>
+          } @else if (buscando()) {
+            <p class="text-muted small mb-0">Buscando radas compatibles...</p>
+          } @else if (compatibles().length === 0) {
+            <div class="alert alert-warning small mb-0">No hay radas libres donde quepa "{{ seleccionada()?.nombre }}".</div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr><th>#</th><th>Rada</th><th>Medidas máx. (E × M × C)</th><th class="text-end">Holgura eslora</th>
+                    <th class="text-end">Aprovechamiento</th><th class="text-end">Tarifa</th><th></th></tr>
+                </thead>
+                <tbody>
+                  @for (c of compatibles(); track c.id) {
+                    <tr [class.table-success]="c.ranking === 1">
+                      <td>{{ c.ranking }}</td>
+                      <td class="text-nowrap"><strong>{{ c.codigo }}</strong><div class="small text-muted">Muelle {{ c.muelle }}</div></td>
+                      <td class="small">{{ c.esloraMax }} × {{ c.mangaMax }} × {{ c.caladoMax }} m</td>
+                      <td class="text-end small">{{ c.holguraEslora | number: '1.2-2' }} m</td>
+                      <td class="text-end">
+                        <div class="barra"><div [style.width.%]="c.aprovechamiento"></div></div>
+                        <span class="small">{{ c.aprovechamiento }}%</span>
+                      </td>
+                      <td class="text-end small text-nowrap">S/ {{ c.tarifaMensual | number: '1.2-2' }}</td>
+                      <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-primario" (click)="asignar(c)">Asignar</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p class="small text-muted mt-2 mb-0"><i class="bi bi-info-circle"></i> La primera opción es la de menor holgura:
+              aprovecha mejor los amarres y deja libres las radas grandes para naves grandes.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Plano de radas -->
+      <div class="card tarjeta">
+        <div class="card-body">
+          <h3 class="seccion">Radas del club <span class="small text-muted fw-normal">· clic en una ocupada para liberarla</span></h3>
+          @for (m of muelles(); track m.muelle) {
+            <div class="muelle-titulo">Muelle {{ m.muelle }}</div>
+            <div class="radas-grid mb-3">
+              @for (r of m.lista; track r.id) {
+                <button type="button" class="rada" [class.ocupada]="r.estado === 'OCUPADA'"
+                  [class.sugerida]="idsCompatibles().has(r.id)" [disabled]="r.estado === 'LIBRE'" (click)="liberar(r)"
+                  [title]="r.estado === 'OCUPADA' ? r.embarcacionNombre + ' · ' + r.socioNombre : 'Libre: ' + r.esloraMax + ' × ' + r.mangaMax + ' m'">
+                  <strong>{{ r.codigo }}</strong>
+                  <span>{{ r.estado === 'OCUPADA' ? r.embarcacionNombre : r.esloraMax + ' m' }}</span>
+                </button>
+              }
+            </div>
+          }
+          <div class="small text-muted">
+            <span class="leyenda libre"></span> Libre <span class="leyenda ocupada ms-3"></span> Ocupada
+            <span class="leyenda sugerida ms-3"></span> Compatible con la nave elegida
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="card tarjeta">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr><th>Rada</th><th>Embarcación</th><th>Socio</th><th>Asignada</th><th>Liberada</th><th>Motivo</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            @for (h of historial() | paginate: { itemsPerPage: 10, currentPage: paginaHistorial(), id: 'historial' }; track h.id) {
+              <tr>
+                <td><strong>{{ h.radaCodigo }}</strong></td>
+                <td>{{ h.embarcacionNombre }} <div class="small text-muted"><code>{{ h.embarcacionMatricula }}</code></div></td>
+                <td class="small">{{ h.socioNombre }}</td>
+                <td class="small">{{ h.fechaAsignacion | date: 'dd/MM/yyyy HH:mm' }}<div class="text-muted">{{ h.asignadoPor }}</div></td>
+                <td class="small">
+                  @if (h.fechaLiberacion) { {{ h.fechaLiberacion | date: 'dd/MM/yyyy HH:mm' }}<div class="text-muted">{{ h.liberadoPor }}</div> }
+                  @else { - }
+                </td>
+                <td class="small">{{ h.motivoLiberacion ?? '-' }}</td>
+                <td>
+                  <span class="badge" [class.text-bg-success]="h.activa" [class.text-bg-secondary]="!h.activa">
+                    {{ h.activa ? 'Vigente' : 'Liberada' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="text-center text-muted py-4">Sin movimientos.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (historial().length > 10) {
+        <pagination-controls id="historial" class="mt-3 d-flex justify-content-center" (pageChange)="paginaHistorial.set($event)"
+          previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+      }
+    </div>
+  </div>
+}

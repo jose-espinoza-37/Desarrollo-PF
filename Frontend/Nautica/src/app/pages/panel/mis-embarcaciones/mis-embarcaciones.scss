@@ -1,0 +1,40 @@
+.nave-nombre {
+  color: var(--primary-color);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.medidas > div {
+  font-weight: 700;
+
+  span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+.subtitulo {
+  margin: 0.75rem 0 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rada-asignada {
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: #eef6ff;
+}
+
+.borde-observada {
+  box-shadow: 0 0 0 2px #e34948, var(--shadow-soft);
+}
+
+.carga-tipo {
+  max-width: 220px;
+}

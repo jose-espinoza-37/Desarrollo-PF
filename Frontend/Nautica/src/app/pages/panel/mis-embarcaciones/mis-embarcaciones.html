@@ -1,0 +1,206 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+  <div>
+    <h2 class="titulo-pagina mb-1"><i class="bi bi-water"></i> Mis embarcaciones</h2>
+    <p class="text-muted small mb-0">
+      Registra una ficha por cada embarcación y adjunta sus documentos. Servicios Navieros la verifica en los registros
+      de Capitanías y luego le asigna una rada.
+    </p>
+  </div>
+  <button type="button" class="btn btn-primario" (click)="abrirFormulario(modalFicha)">
+    <i class="bi bi-plus-lg"></i> Registrar embarcación
+  </button>
+</div>
+
+@if (observadas().length > 0) {
+  <div class="alert alert-danger d-flex gap-2" role="alert">
+    <i class="bi bi-bell-fill fs-5"></i>
+    <div>
+      <strong>Tienes {{ observadas().length }} ficha(s) observada(s).</strong>
+      Revisa las observaciones de Servicios Navieros, corrige la ficha o adjunta el documento pedido.
+    </div>
+  </div>
+}
+
+@if (!cargado()) {
+  <div class="text-center text-muted py-5">Cargando embarcaciones...</div>
+} @else if (embarcaciones().length === 0) {
+  <div class="card tarjeta">
+    <div class="card-body text-center py-5 text-muted">
+      <i class="bi bi-water fs-1 d-block mb-2"></i>
+      Aún no registras embarcaciones. Tener una no es obligatorio para ser socio.
+    </div>
+  </div>
+} @else {
+  <div class="row g-4">
+    @for (e of embarcaciones(); track e.id) {
+      <div class="col-xl-6">
+        <div class="card tarjeta h-100" [class.borde-observada]="e.estado === 'OBSERVADA'">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h3 class="nave-nombre mb-0">{{ e.nombre }}</h3>
+                <code>{{ e.matricula }}</code> · <span class="small text-muted">{{ etiquetaTipo(e.tipo) }} · {{ e.anioFabricacion }}</span>
+              </div>
+              <span class="badge {{ claseEstado(e.estado) }}">{{ etiquetaEstado(e.estado) }}</span>
+            </div>
+
+            <div class="row text-center medidas my-3">
+              <div class="col"><span>Eslora</span>{{ e.eslora | number: '1.2-2' }} m</div>
+              <div class="col"><span>Manga</span>{{ e.manga | number: '1.2-2' }} m</div>
+              <div class="col"><span>Calado</span>{{ e.calado | number: '1.2-2' }} m</div>
+            </div>
+
+            @if (e.estado === 'OBSERVADA') {
+              <div class="alert alert-warning small py-2">
+                <strong>Observación:</strong> {{ e.observaciones }}
+                <div class="mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-dark" (click)="abrirFormulario(modalFicha, e)">
+                    <i class="bi bi-pencil"></i> Corregir ficha
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (e.radaCodigo) {
+              <div class="rada-asignada d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <i class="bi bi-signpost-split"></i> Rada <strong>{{ e.radaCodigo }}</strong> · Muelle {{ e.radaMuelle }}
+                  <div class="small text-muted">Asignada el {{ e.fechaAsignacion | date: 'dd/MM/yyyy' }}</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="constancia(e)">
+                  <i class="bi bi-file-earmark-text"></i> Constancia
+                </button>
+              </div>
+            } @else if (e.estado === 'VERIFICADA') {
+              <p class="small text-muted"><i class="bi bi-hourglass-split"></i> Verificada: en espera de asignación de rada.</p>
+            }
+
+            <h4 class="subtitulo">Documentos de la nave</h4>
+            @if (e.documentos.length === 0) {
+              <p class="small text-muted mb-2">Sin documentos. Adjunta el certificado de matrícula.</p>
+            } @else {
+              <ul class="list-unstyled small mb-2">
+                @for (d of e.documentos; track d.id) {
+                  <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                    <span>
+                      <i class="bi" [class.bi-file-earmark-pdf]="d.contentType === 'application/pdf'"
+                        [class.bi-file-earmark-image]="d.contentType !== 'application/pdf'"></i>
+                      {{ d.nombreArchivo }} <span class="text-muted">({{ tamano(d.tamano) }})</span>
+                    </span>
+                    <button type="button" class="btn btn-link btn-sm p-0" (click)="ver(d.id)">Ver</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (e.estado !== 'VERIFICADA') {
+              <div class="input-group input-group-sm">
+                <select #tipoDoc class="form-select carga-tipo" aria-label="Tipo de documento">
+                  @for (t of tiposDocumento; track t.codigo) {
+                    <option [value]="t.codigo">{{ t.etiqueta }}</option>
+                  }
+                </select>
+                <input #archivo type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  (change)="elegirArchivo(e.id, $event)" />
+                <button type="button" class="btn btn-outline-secondary" [disabled]="subiendo() === e.id"
+                  (click)="subir(e, archivo, tipoDoc.value)">
+                  @if (subiendo() === e.id) { <span class="spinner-border spinner-border-sm"></span> } @else { <i class="bi bi-upload"></i> }
+                  Subir
+                </button>
+              </div>
+              <div class="form-text">PDF, JPG o PNG de hasta 5 MB.</div>
+            }
+
+            <div class="small text-muted mt-3">
+              Registrada el {{ e.fechaRegistro | date: 'dd/MM/yyyy' }}
+              @if (e.fechaVerificacion) { · revisada el {{ e.fechaVerificacion | date: 'dd/MM/yyyy' }} }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- ================= Modal: ficha de Registro de Embarcación ================= -->
+<ng-template #modalFicha let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ editando() ? 'Corregir ficha de embarcación' : 'Registro de Embarcación' }}</h5>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="modal-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="nombre">Nombre de la embarcación *</label>
+          <input id="nombre" class="form-control" formControlName="nombre" maxlength="60" [class.is-invalid]="invalido('nombre')" />
+          @if (invalido('nombre')) {
+            <div class="invalid-feedback">
+              @if (form.controls.nombre.hasError('required')) { El nombre es obligatorio. }
+              @else if (form.controls.nombre.hasError('minlength')) { Mínimo 2 caracteres. }
+              @else { Solo letras, números, espacios y guiones. }
+            </div>
+          }
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="matricula">Matrícula *</label>
+          <input id="matricula" class="form-control text-uppercase" formControlName="matricula" maxlength="12"
+            placeholder="CO-12345-RE" (input)="mayusculas()" [class.is-invalid]="invalido('matricula')" />
+          @if (invalido('matricula')) {
+            <div class="invalid-feedback">
+              @if (form.controls.matricula.hasError('required')) { La matrícula es obligatoria. }
+              @else { Formato XX-12345-XX: dos letras, 4 a 6 dígitos y dos letras. }
+            </div>
+          }
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="tipo">Tipo *</label>
+          <select id="tipo" class="form-select" formControlName="tipo" [class.is-invalid]="invalido('tipo')">
+            <option value="" disabled>Selecciona...</option>
+            @for (t of tipos(); track t.codigo) {
+              <option [value]="t.codigo">{{ t.descripcion }}</option>
+            }
+          </select>
+          @if (invalido('tipo')) { <div class="invalid-feedback">Selecciona el tipo de embarcación.</div> }
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="anio">Año de fabricación *</label>
+          <input id="anio" class="form-control" formControlName="anioFabricacion" maxlength="4" inputmode="numeric"
+            placeholder="2018" [class.is-invalid]="invalido('anioFabricacion')" />
+          @if (invalido('anioFabricacion')) {
+            <div class="invalid-feedback">Ingresa un año entre 1950 y {{ anioActual }}.</div>
+          }
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="eslora">Eslora (m) *</label>
+          <input id="eslora" class="form-control" formControlName="eslora" inputmode="decimal" placeholder="11.40"
+            [class.is-invalid]="invalido('eslora')" />
+          @if (invalido('eslora')) { <div class="invalid-feedback">Largo entre 2 y 40 m, hasta 2 decimales.</div> }
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="manga">Manga (m) *</label>
+          <input id="manga" class="form-control" formControlName="manga" inputmode="decimal" placeholder="3.80"
+            [class.is-invalid]="invalido('manga')" />
+          @if (invalido('manga')) { <div class="invalid-feedback">Ancho entre 0.80 y 12 m, hasta 2 decimales.</div> }
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="calado">Calado (m) *</label>
+          <input id="calado" class="form-control" formControlName="calado" inputmode="decimal" placeholder="1.90"
+            [class.is-invalid]="invalido('calado')" />
+          @if (invalido('calado')) { <div class="invalid-feedback">Entre 0.20 y 6 m, hasta 2 decimales.</div> }
+        </div>
+      </div>
+      <p class="small text-muted mt-3 mb-0">
+        <i class="bi bi-info-circle"></i> Eslora: largo · Manga: ancho · Calado: profundidad bajo el agua.
+        Con estas medidas se elige la rada adecuada.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancelar</button>
+      <button type="submit" class="btn btn-primario" [disabled]="guardando()">
+        @if (guardando()) { <span class="spinner-border spinner-border-sm"></span> }
+        {{ editando() ? 'Guardar y enviar a verificación' : 'Registrar' }}
+      </button>
+    </div>
+  </form>
+</ng-template>
