@@ -25,7 +25,27 @@ export const REGEX = {
 
 
   DIRECCION: /^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü\s.,#°\-/]+$/,
+
+  /** Nombre de la nave: letras, números, espacios y guiones. */
+  NOMBRE_NAVE: /^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü]+(?:[ \-][A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü]+)*$/,
+
+  /** Matrícula: dos letras, 4 a 6 dígitos y dos letras (ej. CO-12345-RE). */
+  MATRICULA: /^[A-Z]{2}-\d{4,6}-[A-Z]{2}$/,
+
+  /** Medida en metros con hasta 2 decimales (eslora, manga, calado). */
+  MEDIDA: /^\d{1,2}(\.\d{1,2})?$/,
+
+  /** Año de 4 dígitos. */
+  ANIO: /^(19[5-9]\d|20\d{2})$/,
 } as const;
+
+/** Archivo PDF, JPG o PNG de hasta 5 MB (documentos de la nave). */
+export function archivoValido(archivo: File | null): string | null {
+  if (!archivo) return 'Selecciona un archivo.';
+  if (!['application/pdf', 'image/jpeg', 'image/png'].includes(archivo.type)) return 'Solo se aceptan archivos PDF, JPG o PNG.';
+  if (archivo.size > 5 * 1024 * 1024) return 'El archivo no puede superar los 5 MB.';
+  return null;
+}
 
 
 export function soloDigitos(control: AbstractControl | null): void {

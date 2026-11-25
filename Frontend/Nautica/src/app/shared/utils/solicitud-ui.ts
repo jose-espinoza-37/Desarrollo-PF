@@ -3,30 +3,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Solicitud } from '../../core/models/solicitud.models';
 
 
-export const ESTADOS: Record<string, { etiqueta: string; clase: string }> = {
-  PENDIENTE: { etiqueta: 'Pendiente de verificación', clase: 'text-bg-warning' },
-  VERIFICADA: { etiqueta: 'Pendiente de aprobación', clase: 'text-bg-info' },
-  NO_APTA: { etiqueta: 'No apta', clase: 'text-bg-secondary' },
-  APROBADA: { etiqueta: 'Aprobada', clase: 'text-bg-success' },
-  DESAPROBADA: { etiqueta: 'Desaprobada', clase: 'text-bg-danger' },
+/** Color del badge de cada estado (solo presentación; las etiquetas vienen del catálogo). */
+export const CLASE_ESTADO: Record<string, string> = {
+  PENDIENTE: 'text-bg-warning',
+  VERIFICADA: 'text-bg-info',
+  NO_APTA: 'text-bg-secondary',
+  APROBADA: 'text-bg-success',
+  DESAPROBADA: 'text-bg-danger',
 };
 
-export const CLASIFICACIONES: Record<string, { etiqueta: string; clase: string; descripcion: string }> = {
-  PAGADOR: {
-    etiqueta: 'Pagador',
-    clase: 'text-bg-success',
-    descripcion: 'Paga puntualmente. Pasa a aprobación del Jefe de Atención al Cliente.',
-  },
-  PAGADOR_ESPORADICO: {
-    etiqueta: 'Pagador esporádico',
-    clase: 'text-bg-warning',
-    descripcion: 'Paga con atrasos. La solicitud queda como NO APTA.',
-  },
-  RENUENTE: {
-    etiqueta: 'Renuente a pago',
-    clase: 'text-bg-danger',
-    descripcion: 'No paga sus obligaciones. La solicitud queda como NO APTA.',
-  },
+/** Color del badge de cada clasificación de pago. */
+export const CLASE_CLASIFICACION: Record<string, string> = {
+  PAGADOR: 'text-bg-success',
+  PAGADOR_ESPORADICO: 'text-bg-warning',
+  RENUENTE: 'text-bg-danger',
 };
 
 
@@ -34,12 +24,36 @@ export function codigoCorto(codigo: string | null | undefined): string {
   return (codigo ?? '').substring(0, 8).toUpperCase();
 }
 
-export function etiquetaEstado(estado: string): string {
-  return ESTADOS[estado]?.etiqueta ?? estado;
+/** Color del badge del estado de la ficha de embarcación. */
+export const CLASE_ESTADO_EMBARCACION: Record<string, string> = {
+  PENDIENTE: 'text-bg-warning',
+  VERIFICADA: 'text-bg-success',
+  OBSERVADA: 'text-bg-danger',
+};
+
+/** Abre en una pestaña nueva el archivo descargado (PDF o imagen). */
+export function abrirArchivo(blob: Blob): void {
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+/** Escapa texto que se inserta en HTML generado (constancias). */
+export function escaparHtml(texto: string | number | null | undefined): string {
+  return String(texto ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export function claseEstado(estado: string): string {
-  return ESTADOS[estado]?.clase ?? 'text-bg-light';
+  return CLASE_ESTADO[estado] ?? 'text-bg-light';
+}
+
+export function claseClasificacion(codigo: string | null): string {
+  return CLASE_CLASIFICACION[codigo ?? ''] ?? 'text-bg-light';
 }
 
 
@@ -59,7 +73,7 @@ export function antecedentesDe(todas: Solicitud[], s: Solicitud): Solicitud[] {
     .sort((a, b) => b.fechaSolicitud.localeCompare(a.fechaSolicitud));
 }
 
-export function antecedentesHtml(lista: Solicitud[]): string {
+export function antecedentesHtml(lista: Solicitud[], etiquetaEstado: (codigo: string) => string): string {
   const esc = (t: string | null) =>
     (t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const filas = lista

@@ -111,7 +111,7 @@
                 </td>
                 <td>
                   @if (s.clasificacion) {
-                    <span class="badge {{ CLASIFICACIONES[s.clasificacion].clase }}">{{ CLASIFICACIONES[s.clasificacion].etiqueta }}</span>
+                    <span class="badge {{ claseClasificacion(s.clasificacion) }}">{{ etiquetaClasificacion(s.clasificacion) }}</span>
                   }
                 </td>
                 <td><span class="badge {{ claseEstado(s.estado) }}">{{ etiquetaEstado(s.estado) }}</span></td>

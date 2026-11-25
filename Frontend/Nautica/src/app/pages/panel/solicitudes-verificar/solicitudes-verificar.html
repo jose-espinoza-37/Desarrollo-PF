@@ -141,12 +141,12 @@
       <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
         <label class="form-label fw-semibold">Clasificación del postulante *</label>
         <div class="row g-2 mb-1">
-          @for (op of opciones; track op[0]) {
+          @for (op of opciones(); track op.codigo) {
             <div class="col-md-4">
-              <input type="radio" class="btn-check" [id]="'clas-' + op[0]" [value]="op[0]" formControlName="clasificacion" />
-              <label class="btn btn-outline-secondary w-100 h-100 text-start opcion" [for]="'clas-' + op[0]">
-                <span class="badge {{ op[1].clase }} mb-1">{{ op[1].etiqueta }}</span>
-                <span class="d-block small">{{ op[1].descripcion }}</span>
+              <input type="radio" class="btn-check" [id]="'clas-' + op.codigo" [value]="op.codigo" formControlName="clasificacion" />
+              <label class="btn btn-outline-secondary w-100 h-100 text-start opcion" [for]="'clas-' + op.codigo">
+                <span class="badge {{ claseClasificacion(op.codigo) }} mb-1">{{ op.descripcion }}</span>
+                <span class="d-block small">{{ op.detalle }}</span>
               </label>
             </div>
           }
@@ -157,7 +157,7 @@
 
         <label class="form-label fw-semibold mt-3" for="resultado">Resultado de la verificación con otros clubes *</label>
         <textarea id="resultado" rows="3" class="form-control" formControlName="resultadoVerificacion" maxlength="500"
-          placeholder="Ej. Club Regatas Lima confirma pagos puntuales en los últimos 2 años."
+          placeholder="Ej. El club consultado confirma pagos puntuales en los últimos 2 años."
           [class.is-invalid]="invalido('resultadoVerificacion')"></textarea>
         <div class="d-flex justify-content-between">
           <div>

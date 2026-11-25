@@ -8,13 +8,13 @@ import { SolicitudService } from '../../../core/services/solicitud.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Solicitud } from '../../../core/models/solicitud.models';
 import { REGEX } from '../../../shared/validators/regex';
+import { CatalogoService } from '../../../core/services/catalogo.service';
 import {
-  CLASIFICACIONES,
   antecedentesDe,
   antecedentesHtml,
+  claseClasificacion,
   claseEstado,
   codigoCorto,
-  etiquetaEstado,
   mensajeError,
 } from '../../../shared/utils/solicitud-ui';
 
@@ -32,8 +32,11 @@ export class SolicitudesAprobar implements OnInit {
   private readonly solicitudService = inject(SolicitudService);
   private readonly toast = inject(ToastService);
 
-  readonly CLASIFICACIONES = CLASIFICACIONES;
-  readonly etiquetaEstado = etiquetaEstado;
+  private readonly catalogo = inject(CatalogoService);
+
+  readonly etiquetaEstado = (codigo: string) => this.catalogo.etiquetaEstado(codigo);
+  readonly etiquetaClasificacion = (codigo: string | null) => this.catalogo.etiquetaClasificacion(codigo);
+  readonly claseClasificacion = claseClasificacion;
   readonly codigoCorto = codigoCorto;
   readonly claseEstado = claseEstado;
 
@@ -60,7 +63,7 @@ export class SolicitudesAprobar implements OnInit {
     Swal.fire({
       icon: 'warning',
       title: `Antecedentes del DNI ${s.dni}`,
-      html: antecedentesHtml(this.antecedentes(s)),
+      html: antecedentesHtml(this.antecedentes(s), this.etiquetaEstado),
       width: 720,
       confirmButtonText: 'Cerrar',
       confirmButtonColor: '#0b2d42',
@@ -68,6 +71,7 @@ export class SolicitudesAprobar implements OnInit {
   }
 
   ngOnInit(): void {
+    this.catalogo.cargar();
     this.cargar();
   }
 
@@ -86,7 +90,7 @@ export class SolicitudesAprobar implements OnInit {
     const aviso = previas.length
       ? `<div style="margin-top:14px;padding:10px;border-radius:8px;background:#fdf2f2;color:#842029;text-align:left;font-size:0.9rem">
            <strong>Atención:</strong> este DNI tiene ${previas.length} solicitud(es) anterior(es).
-           ${antecedentesHtml(previas)}
+           ${antecedentesHtml(previas, this.etiquetaEstado)}
          </div>`
       : '';
     const r = await Swal.fire({

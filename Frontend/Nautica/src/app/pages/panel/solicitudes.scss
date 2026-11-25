@@ -54,3 +54,11 @@ thead th {
 :host ::ng-deep .ngx-pagination .current {
   background: var(--primary-color);
 }
+
+.buscador {
+  max-width: 320px;
+}
+
+.detalle > td {
+  background: #f7f9fb;
+}

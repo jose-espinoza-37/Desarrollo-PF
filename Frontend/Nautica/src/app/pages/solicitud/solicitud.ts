@@ -9,7 +9,9 @@ import { SolicitudService } from '../../core/services/solicitud.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Seguimiento } from '../../core/models/solicitud.models';
 import { REGEX, camposIguales, edadMinima, soloDigitos } from '../../shared/validators/regex';
-import { claseEstado, etiquetaEstado, mensajeError } from '../../shared/utils/solicitud-ui';
+import { CatalogoService } from '../../core/services/catalogo.service';
+import { ConCambiosPendientes } from '../../core/guards/cambios-pendientes.guard';
+import { claseEstado, mensajeError } from '../../shared/utils/solicitud-ui';
 
 
 @Component({
@@ -19,12 +21,13 @@ import { claseEstado, etiquetaEstado, mensajeError } from '../../shared/utils/so
   templateUrl: './solicitud.html',
   styleUrl: './solicitud.scss',
 })
-export class SolicitudPage {
+export class SolicitudPage implements ConCambiosPendientes {
   private readonly solicitudService = inject(SolicitudService);
   private readonly toast = inject(ToastService);
 
   readonly soloDigitos = soloDigitos;
-  readonly etiquetaEstado = etiquetaEstado;
+  private readonly catalogo = inject(CatalogoService);
+  readonly etiquetaEstado = (codigo: string) => this.catalogo.etiquetaEstado(codigo);
   readonly claseEstado = claseEstado;
 
   readonly enviando = signal(false);
@@ -84,7 +87,13 @@ export class SolicitudPage {
     }),
   });
 
+  /** Usado por cambiosPendientesGuard: hay datos escritos y no se está enviando. */
+  tieneCambiosPendientes(): boolean {
+    return this.form.dirty && !this.enviando();
+  }
+
   constructor() {
+    this.catalogo.cargar();
 
     this.form.controls.poseeEmbarcacion.valueChanges.subscribe((posee) => {
       const cantidad = this.form.controls.cantidadEmbarcaciones;

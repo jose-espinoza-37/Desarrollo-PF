@@ -9,12 +9,12 @@ import { SolicitudService } from '../../../core/services/solicitud.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Clasificacion, Solicitud } from '../../../core/models/solicitud.models';
 import { REGEX } from '../../../shared/validators/regex';
+import { CatalogoService } from '../../../core/services/catalogo.service';
 import {
-  CLASIFICACIONES,
   antecedentesDe,
+  claseClasificacion,
   claseEstado,
   codigoCorto,
-  etiquetaEstado,
   mensajeError,
 } from '../../../shared/utils/solicitud-ui';
 
@@ -30,14 +30,16 @@ export class SolicitudesVerificar implements OnInit {
   private readonly solicitudService = inject(SolicitudService);
   private readonly toast = inject(ToastService);
   private readonly modal = inject(NgbModal);
+  private readonly catalogo = inject(CatalogoService);
 
-  readonly CLASIFICACIONES = CLASIFICACIONES;
-  readonly opciones = Object.entries(CLASIFICACIONES) as [Clasificacion, (typeof CLASIFICACIONES)[string]][];
+  /** Opciones de clasificación leídas de la tabla clasificacion_pago. */
+  readonly opciones = this.catalogo.clasificaciones;
 
   readonly seleccionada = signal<Solicitud | null>(null);
-  readonly etiquetaEstado = etiquetaEstado;
+  readonly etiquetaEstado = (codigo: string) => this.catalogo.etiquetaEstado(codigo);
   readonly codigoCorto = codigoCorto;
   readonly claseEstado = claseEstado;
+  readonly claseClasificacion = claseClasificacion;
 
 
   private readonly todas = signal<Solicitud[]>([]);
@@ -95,6 +97,7 @@ export class SolicitudesVerificar implements OnInit {
   }
 
   ngOnInit(): void {
+    this.catalogo.cargar();
     this.cargar();
   }
 
