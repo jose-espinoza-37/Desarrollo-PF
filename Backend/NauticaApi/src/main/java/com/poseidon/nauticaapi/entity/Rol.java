@@ -1,24 +1,23 @@
 package com.poseidon.nauticaapi.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+/** Perfil de usuario. Cada rol tiene asignados los módulos que verá en su menú. */
 @Entity
 @Table(name = "roles")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rol {
 
     public static final String GERENTE = "GERENTE";
@@ -38,45 +37,22 @@ public class Rol {
     private String nombre;
 
     @Column(nullable = false)
-    private boolean activo = true;
-
+    @Builder.Default
+    private Boolean activo = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "rol_modulo",
             joinColumns = @JoinColumn(name = "rol_id"),
             inverseJoinColumns = @JoinColumn(name = "modulo_id"))
+    @Builder.Default
     private Set<Modulo> modulos = new HashSet<>();
 
-    public Rol() {
-    }
-
-    public Rol(String codigo, String nombre) {
-        this.codigo = codigo;
-        this.nombre = nombre;
-        this.activo = true;
-    }
-
-
+    /** Módulos activos del rol, en el orden en que aparecen en el menú. */
     public List<Modulo> getModulosActivosOrdenados() {
         return modulos.stream()
-                .filter(Modulo::isActivo)
+                .filter(Modulo::getActivo)
                 .sorted(Comparator.comparing(Modulo::getOrden))
                 .toList();
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
-
-    public Set<Modulo> getModulos() { return modulos; }
-    public void setModulos(Set<Modulo> modulos) { this.modulos = modulos; }
 }
